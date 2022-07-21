@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Form, Button, Table } from "react-bootstrap";
 import Papa from "papaparse";
 import { TableCSVExporter } from "./TableCSVExporter";
+import ReactHTMLTableToExcel from "react-html-table-to-excel";
+let xlsx = require("json-as-xlsx");
 
 function Home() {
+  const tableRef = useRef(null);
   const [date, setDate] = useState();
   const [today, setToday] = useState();
   const [euroEndingBalance, setEuroEndingBalance] = useState(0);
@@ -13,6 +16,11 @@ function Home() {
   const [showTable, setShowTable] = useState(false);
   const [euroArray, setEuroArray] = useState();
   const [dollarArray, setDollarArray] = useState();
+
+  const [checkedRadio, setCheckedRadio] = useState(1);
+
+  const [euroCession, setEuroCession] = useState(null);
+  const [dollarCession, setDollarCession] = useState(null);
 
   const [euroBeginningBalance, setEuroBeginningBalance] = useState(0);
   const [dollarBeginningBalance, setDollarBeginningBalance] = useState(0);
@@ -130,14 +138,21 @@ function Home() {
         dollarResult += parseFloat(val.Amount);
       });
     }
-    setDollarEndingBalance(dollarResult);
+
+    if (dollarCession) dollarResult += parseFloat(dollarCession);
+
+    // setDollarEndingBalance(dollarResult);
+    setDollarEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
 
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalIncomeResult += parseFloat(val.Amount);
       });
     }
-    setEndingRentalIncome(rentalIncomeResult);
+    setEndingRentalIncome(
+      (Math.round(rentalIncomeResult * 100) / 100).toFixed(2)
+    );
+
     // setShowTable(true);
 
     if (euroArray) {
@@ -147,27 +162,17 @@ function Home() {
         euroResult += parseFloat(val.Amount);
       });
     }
-    setEuroEndingBalance(euroResult);
 
+    if (euroCession) euroResult += parseFloat(euroCession);
+
+    setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
     setShowTable(true);
   };
 
   const downloadExcelSheet = () => {
     console.log("todo");
-    const dataTable = document.getElementById("dataTable");
-    const exporter = new TableCSVExporter(dataTable);
-    const csvOutput = exporter.convertToCSV();
-    const csvBlob = new Blob([csvOutput], { type: "text/csv" });
-    const blobUrl = URL.createObjectURL(csvBlob);
-    const anchorElement = document.createElement("a");
-
-    anchorElement.href = blobUrl;
-    anchorElement.download = `table-export-${date}.csv`;
-    anchorElement.click();
-
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 500);
+    var buttonToClick = document.getElementById("test-table-xls-button");
+    buttonToClick.click();
   };
 
   useEffect(() => {
@@ -178,7 +183,7 @@ function Home() {
 
     today = mm + "/" + dd + "/" + yyyy;
 
-    setToday(today)
+    setToday(today);
   }, []);
 
   return (
@@ -209,46 +214,95 @@ function Home() {
             aria-describedby="passwordHelpBlock"
             onChange={(e) => setDollarBeginningBalance(e.target.value)}
           />
-          {/* <Form.Text id="passwordHelpBlock" muted>
-            Your password must be 8-20 characters long, contain letters and
-            numbers, and must not contain spaces, special characters, or emoji.
-          </Form.Text> */}
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-5">
           <Form.Label>Choisissez le fichier Recettes USD</Form.Label>
           <Form.Control
             type="file"
             placeholder="Enter email"
             onChange={rentalIncomeChangeHandler}
           />
-          <Form.Text className="text-muted">
+          {/* <Form.Text className="text-muted">
             Example : We'll never share your incomes with anyone else.
-          </Form.Text>
+          </Form.Text> */}
         </Form.Group>
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-5">
           <Form.Label>Choisissez le fichier Dépenses USD</Form.Label>
           <Form.Control
             type="file"
             placeholder="Enter email"
             onChange={dollarChangeHandler}
           />
-          <Form.Text className="text-muted">
+          {/* <Form.Text className="text-muted">
             Example : We'll never share your incomes with anyone else.
-          </Form.Text>
+          </Form.Text> */}
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-5">
           <Form.Label>Choisissez le fichier Dépenses EURO</Form.Label>
           <Form.Control
             type="file"
             placeholder="Enter email"
             onChange={euroChangeHandler}
           />
-          <Form.Text className="text-muted">
+          {/* <Form.Text className="text-muted">
             Example : We'll never share your expenses with anyone else.
-          </Form.Text>
+          </Form.Text> */}
         </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="inputPassword5">
+            Cession devises EURO (optionnel)
+          </Form.Label>
+          <Form.Control
+            type="number"
+            defaultValue={0}
+            maxLength={10}
+            id="inputPassword5"
+            aria-describedby="passwordHelpBlock"
+            onChange={(e) => setEuroCession(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="inputPassword5">
+            Cession devises USD (optionnel)
+          </Form.Label>
+          <Form.Control
+            type="number"
+            defaultValue={0}
+            maxLength={10}
+            id="inputPassword5"
+            aria-describedby="passwordHelpBlock"
+            onChange={(e) => setDollarCession(e.target.value)}
+          />
+        </Form.Group>
+
+        <div
+          key={`inline-radio`}
+          className="mb-3"
+          onChange={(e) => setCheckedRadio(e.target.id[e.target.id.length - 1])}
+        >
+          <Form.Label htmlFor="inputPassword5">
+            Devise achetée (optionnel)
+          </Form.Label>
+          <Form.Check
+            inline
+            label="$"
+            name="group1"
+            type="radio"
+            id={`inline-radio-1`}
+            defaultChecked={true}
+          />
+          <Form.Check
+            inline
+            label="€"
+            name="group1"
+            type="radio"
+            id={`inline-radio-2`}
+          />
+        </div>
 
         <Button
           variant="primary"
@@ -260,159 +314,228 @@ function Home() {
       </div>
 
       {showTable && (
-        <Table
-          id="dataTable"
-          style={{ marginLeft: "2rem", marginRight: "2rem", marginTop: "2rem" }}
-          striped
-          bordered
-          hover
-        >
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Recettes USD</th>
-              <th>Depenses USD</th>
-              <th>Solde USD</th>
-              <th>Recettes EURO</th>
-              <th>Depenses EURO</th>
-              <th>Solde EURO</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Beginning Balance */}
-            <tr>
-              <td></td>
-              <td>Solde initial</td>
-              <td>-</td>
-              <td>-</td>
-              <td>
-                <strong>USD {dollarBeginningBalance} </strong>
-              </td>
-              <td>-</td>
-              <td>-</td>
-              <td>
-                <strong>{euroBeginningBalance} EUR</strong>
-              </td>
-            </tr>
+        <>
+          <ReactHTMLTableToExcel
+            id="test-table-xls-button"
+            className="download-table-xls-button"
+            table="dataTable"
+            filename={`property-ink-export-${date}`}
+            sheet="tablexls"
+            buttonText="Download File"
+          />
+          <Table
+            id="dataTable"
+            style={{
+              marginLeft: "2rem",
+              marginRight: "2rem",
+              marginTop: "2rem",
+            }}
+            striped
+            bordered
+            hover
+          >
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Recettes USD</th>
+                <th>Depenses USD</th>
+                <th>Solde USD</th>
+                <th>Recettes EURO</th>
+                <th>Depenses EURO</th>
+                <th>Solde EURO</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Beginning Balance */}
+              <tr>
+                <td></td>
+                <td>Solde initial</td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                  <strong>USD {dollarBeginningBalance} </strong>
+                </td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                  <strong>{euroBeginningBalance} EUR</strong>
+                </td>
+              </tr>
 
-            {/* Rental Income */}
-            <tr>
-              <td></td>
-              <td>
-                {" "}
-                <strong>Rental Income </strong>
-              </td>
-            </tr>
+              {/* Rental Income */}
+              <tr>
+                <td></td>
+                <td>
+                  {" "}
+                  <strong>Rental Income </strong>
+                </td>
+              </tr>
 
-            {rentalIncomeArray.map((value, index) => {
-              return (
-                <tr key={index}>
-                  {/* {value.map((val, i) => {
-                  return <td key={i}>{val}</td>;
-                })} */}
-                  <td>{value.Date}</td>
-                  <td>{value["Client Name"]}</td>
-                  <td>USD {value.Amount}</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
+              {rentalIncomeArray.map((value, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{value.Date}</td>
+                    <td>{value["Client Name"]}</td>
+                    <td>USD {value.Amount}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                );
+              })}
+
+              {/* Cession de devises */}
+              {(dollarCession || euroCession) && (
+                <tr>
+                  <td> </td>
+                  <td>
+                    <strong>Cession de devises</strong>
+                  </td>
+                  {dollarCession && checkedRadio == 1 && (
+                    <>
+                      <td> </td>
+                      <td>$ {dollarCession}</td>
+                      <td> </td>
+                    </>
+                  )}
+                  {dollarCession && checkedRadio == 2 && (
+                    <>
+                      <td>$ {dollarCession}</td>
+                      <td> </td>
+                      <td> </td>
+                    </>
+                  )}
+                  {!dollarCession && (
+                    <>
+                      <td> </td> <td> </td> <td> </td>
+                    </>
+                  )}
+                  {/* ----- */}
+                  {euroCession && checkedRadio == 1 && (
+                    <>
+                      <td>$ {euroCession}</td>
+                      <td> </td>
+                      <td> </td>
+                    </>
+                  )}
+                  {euroCession && checkedRadio == 2 && (
+                    <>
+                      <td> </td>
+                      <td>$ {euroCession}</td>
+                      <td> </td>
+                    </>
+                  )}
+                  {!euroCession && (
+                    <>
+                      <td> </td> <td> </td> <td> </td>
+                    </>
+                  )}
                 </tr>
-              );
-            })}
+              )}
 
-            <tr>
-              <td>-</td>
-              <td>
-                <strong>{values[0]["Parent Category"]}</strong>
-              </td>
-            </tr>
-            {values.map((value, index) => {
-              return (
-                <>
-                  {index >= 1 &&
-                    value["Parent Category"].localeCompare(
-                      values[index - 1]["Parent Category"]
-                    ) != 0 && (
-                      <tr>
+              <tr>
+                <td>-</td>
+                <td>
+                  <strong>{values[0]["Parent Category"]}</strong>
+                </td>
+              </tr>
+              {values.map((value, index) => {
+                return (
+                  <>
+                    {index >= 1 &&
+                      value["Parent Category"].localeCompare(
+                        values[index - 1]["Parent Category"]
+                      ) != 0 && (
+                        <tr>
+                          <td>-</td>
+                          <td>
+                            <strong>{value["Parent Category"]}</strong>
+                          </td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                          <td> </td>
+                        </tr>
+                      )}
+
+                    {value.Currency == "EUR" && (
+                      <tr key={index}>
+                        <td>{value.Date}</td>
+                        <td>{value.Merchant}</td>
                         <td>-</td>
-                        <td>
-                          <strong>{value["Parent Category"]}</strong>
-                        </td>
-                        <td> </td>
-                        <td> </td>
-                        <td> </td>
-                        <td> </td>
-                        <td> </td>
-                        <td> </td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>{value.Amount}</td>
+                        <td>-</td>
                       </tr>
                     )}
-
-                  {value.Currency == "EUR" && (
-                    <tr key={index}>
-                      <td>{value.Date}</td>
-                      <td>{value.Merchant}</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>{value.Amount}</td>
-                      <td>-</td>
-                    </tr>
-                  )}
-                  {value.Currency == "USD" && (
-                    <tr key={index}>
-                      <td>{value.Date}</td>
-                      <td>{value.Merchant}</td>
-                      <td>-</td>
-                      <td>{value.Amount}</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                    </tr>
-                  )}
-                </>
-              );
-            })}
-            <tr>
-              <td></td>
-              <td><strong>Solde de cloture</strong></td>
-              {rentalIncomeArray.length > 0 && (<td>
-                <strong>USD {endingRentalIncome}</strong>
-              </td>)}
-              {rentalIncomeArray.length == 0 && (<td>
-                -
-              </td>)}
-              <td>-</td>
-              <td>
-                <strong>USD {dollarEndingBalance}</strong>
-              </td>
-              <td>-</td>
-              <td>-</td>
-              <td>
-                <strong> {euroEndingBalance}EUR</strong>
-              </td>
-            </tr>
-            <tr>
-              <td>Account Managed by</td>
-              <td>ROGERS Line</td>
-            </tr>
-            <tr>
-              <td>Report generated on</td>
-              <td>{today}</td>
-            </tr>
-          </tbody>
-        </Table>
+                    {value.Currency == "USD" && (
+                      <tr key={index}>
+                        <td>{value.Date}</td>
+                        <td>{value.Merchant}</td>
+                        <td>-</td>
+                        <td>{value.Amount}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                      </tr>
+                    )}
+                  </>
+                );
+              })}
+              <tr>
+                <td></td>
+                <td>
+                  <strong>Solde de cloture</strong>
+                </td>
+                {rentalIncomeArray.length > 0 && (
+                  <td>
+                    <strong>USD {endingRentalIncome}</strong>
+                  </td>
+                )}
+                {rentalIncomeArray.length == 0 && <td>-</td>}
+                <td>-</td>
+                <td>
+                  <strong>USD {dollarEndingBalance}</strong>
+                </td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                  <strong> {euroEndingBalance} EUR</strong>
+                </td>
+              </tr>
+              <tr>
+                <td>Account Managed by</td>
+                <td>ROGERS Line</td>
+              </tr>
+              <tr>
+                <td>Report generated on</td>
+                <td>{today}</td>
+              </tr>
+            </tbody>
+          </Table>
+        </>
       )}
-      {showTable && (<Button
-        style={{ marginLeft: "2rem", marginRight: "2rem", marginTop: "2rem" }}
-        onClick={() => downloadExcelSheet()}
-      >
-        Download File
-      </Button>)}
+      {showTable && (
+        <Button
+          style={{
+            marginLeft: "2rem",
+            marginRight: "2rem",
+            marginTop: "2rem",
+            marginBottom: "2rem",
+          }}
+          onClick={() => downloadExcelSheet()}
+        >
+          Download File
+        </Button>
+      )}
     </div>
   );
 }
