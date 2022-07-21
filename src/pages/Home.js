@@ -128,29 +128,26 @@ function Home() {
         console.log(val.Amount);
         dollarResult += parseFloat(val.Amount);
       });
-      console.log("result");
-      setDollarEndingBalance(dollarResult);
     }
+    setDollarEndingBalance(dollarResult);
 
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalIncomeResult += parseFloat(val.Amount);
       });
-      console.log("result");
-      setEndingRentalIncome(rentalIncomeResult);
     }
+    setEndingRentalIncome(rentalIncomeResult);
     // setShowTable(true);
 
-    // ##TODO
     if (euroArray) {
       euroArray.forEach((val) => {
         console.log("val");
         console.log(val.Amount);
         euroResult += parseFloat(val.Amount);
-        console.log("result");
-        setEuroEndingBalance(euroResult);
       });
     }
+    setEuroEndingBalance(euroResult);
+
     setShowTable(true);
   };
 
