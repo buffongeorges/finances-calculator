@@ -378,7 +378,7 @@ function Home() {
             })}
             <tr>
               <td></td>
-              <td>Solde de cloture</td>
+              <td><strong>Solde de cloture</strong></td>
               <td>
                 <strong>USD {endingRentalIncome}</strong>
               </td>
