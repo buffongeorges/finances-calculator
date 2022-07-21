@@ -17,16 +17,11 @@ function Home() {
   const [euroBeginningBalance, setEuroBeginningBalance] = useState(0);
   const [dollarBeginningBalance, setDollarBeginningBalance] = useState(0);
 
-  // State to store parsed data
-  const [parsedData, setParsedData] = useState([]);
-
-  //State to store table Column name
-  const [tableRows, setTableRows] = useState([]);
-
   //State to store the values
   const [values, setValues] = useState([]);
 
   const dollarChangeHandler = (event) => {
+    setShowTable(false);
     // Passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
       header: true,
@@ -43,21 +38,32 @@ function Home() {
           valuesArray.push(Object.values(d));
         });
 
-        // Parsed Data Response in array format
-        setParsedData(results.data);
-
-        // Filtered Column Names
-        setTableRows(rowsArray[0]);
-
         // Filtered Values
-        setValues(results.data);
+        // setValues(results.data);
 
         setDollarArray(results.data);
+
+        //START TEST
+        let newArray = values.concat(results.data);
+        console.log("before sort");
+        console.log(newArray);
+
+        newArray.sort((a, b) => {
+          console.log(a);
+          console.log(a["Parent Category"]);
+          return a["Parent Category"].localeCompare(b["Parent Category"]);
+        });
+        console.log("after sort");
+        console.log(newArray);
+
+        setValues(newArray);
+        //END TESTS
       },
     });
   };
 
   const euroChangeHandler = (event) => {
+    setShowTable(false);
     // Passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
       header: true,
@@ -70,12 +76,6 @@ function Home() {
           // rowsArray.push(Object.keys(d));
           valuesArray.push(Object.values(d));
         });
-
-        console.log("tableau en euro");
-        console.log(results.data);
-
-        console.log("previous dollar array");
-        console.log(values);
 
         setEuroArray(results.data);
         let newArray = values.concat(results.data);
@@ -96,6 +96,7 @@ function Home() {
   };
 
   const rentalIncomeChangeHandler = (event) => {
+    setShowTable(false);
     // Passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
       header: true,
@@ -379,9 +380,12 @@ function Home() {
             <tr>
               <td></td>
               <td><strong>Solde de cloture</strong></td>
-              <td>
+              {rentalIncomeArray.length > 0 && (<td>
                 <strong>USD {endingRentalIncome}</strong>
-              </td>
+              </td>)}
+              {rentalIncomeArray.length == 0 && (<td>
+                -
+              </td>)}
               <td>-</td>
               <td>
                 <strong>USD {dollarEndingBalance}</strong>
