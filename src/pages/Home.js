@@ -289,7 +289,7 @@ function Home() {
               <td>-</td>
               <td>-</td>
               <td>
-                <strong>USD {dollarBeginningBalance}</strong>
+                <strong>USD {dollarBeginningBalance} </strong>
               </td>
               <td>-</td>
               <td>-</td>
