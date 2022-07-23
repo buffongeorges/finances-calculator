@@ -15,8 +15,10 @@ function Home() {
   const [euroIncomesEndingBalance, setEuroIncomesEndingBalance] = useState(0);
 
   const [dollarEndingBalance, setDollarEndingBalance] = useState(null);
-  const [dollarExpensesEndingBalance, setDollarExpensesEndingBalance] = useState(null);
-  const [dollarIncomesEndingBalance, setDollarIncomesEndingBalance] = useState(null);
+  const [dollarExpensesEndingBalance, setDollarExpensesEndingBalance] =
+    useState(null);
+  const [dollarIncomesEndingBalance, setDollarIncomesEndingBalance] =
+    useState(null);
   const [endingRentalIncome, setEndingRentalIncome] = useState(null);
 
   const [showTable, setShowTable] = useState(false);
@@ -42,8 +44,6 @@ function Home() {
       header: true,
       skipEmptyLines: true,
       complete: function (results) {
-        console.log("Hello world");
-        console.log(results.data);
         const rowsArray = [];
         const valuesArray = [];
 
@@ -59,19 +59,12 @@ function Home() {
         setDollarArray(results.data);
 
         let newArray = values.concat(results.data);
-        console.log("before sort");
-        console.log(newArray);
 
         newArray.sort((a, b) => {
-          console.log(a);
-          console.log(a["Parent Category"]);
           return a["Parent Category"].localeCompare(b["Parent Category"]);
         });
-        console.log("after sort");
-        console.log(newArray);
 
         setValues(newArray);
-       
       },
     });
   };
@@ -93,16 +86,10 @@ function Home() {
 
         setEuroArray(results.data);
         let newArray = values.concat(results.data);
-        console.log("before sort");
-        console.log(newArray);
 
         newArray.sort((a, b) => {
-          console.log(a);
-          console.log(a["Parent Category"]);
           return a["Parent Category"].localeCompare(b["Parent Category"]);
         });
-        console.log("after sort");
-        console.log(newArray);
 
         setValues(newArray);
       },
@@ -116,8 +103,6 @@ function Home() {
       header: true,
       skipEmptyLines: true,
       complete: function (results) {
-        console.log("rental incomes");
-        console.log(results.data);
         setRentalIncomeArray(results.data);
       },
     });
@@ -131,57 +116,57 @@ function Home() {
 
     today = mm + "-" + dd + "-" + yyyy;
     setDate(today);
-    console.log("le rapport");
-    console.log(values);
-    let dollarResult = parseFloat(dollarBeginningBalance);
-    let euroResult = parseFloat(euroBeginningBalance);
+    console.log("euroBeginningBalance");
+    console.log(euroBeginningBalance);
+    let dollarResult = parseFloat(0);
+    let euroResult = parseFloat(0);
     let rentalIncomeResult = parseFloat(0);
 
     if (dollarArray) {
       dollarArray.forEach((val) => {
-        console.log("val");
-        console.log(val.Amount);
         dollarResult += parseFloat(val.Amount);
       });
     }
 
-    if (dollarCession) dollarResult += parseFloat(dollarCession);
+    console.log("checkedRadio");
+    console.log(checkedRadio);
+    if (dollarCession && checkedRadio == 1)
+      dollarResult += parseFloat(dollarCession);
 
-    // setDollarEndingBalance(dollarResult);
-    setDollarExpensesEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
+    setDollarExpensesEndingBalance(
+      (Math.round(dollarResult * 100) / 100).toFixed(2)
+    );
+
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalIncomeResult += parseFloat(val.Amount);
       });
+      if (dollarCession && checkedRadio == 2)
+        rentalIncomeResult += parseFloat(dollarCession);
     }
-    
-    if (rentalIncomeArray.length > 0)
-    {
+
+    if (rentalIncomeArray.length > 0) {
       setEndingRentalIncome(
         (Math.round(rentalIncomeResult * 100) / 100).toFixed(2)
       );
     }
-    
-
-    // setShowTable(true);
 
     if (euroArray) {
       euroArray.forEach((val) => {
-        console.log("val");
-        console.log(val.Amount);
         euroResult += parseFloat(val.Amount);
       });
     }
 
     if (euroCession) euroResult += parseFloat(euroCession);
 
-    setEuroExpensesEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
-    
+    setEuroExpensesEndingBalance(
+      (Math.round(euroResult * 100) / 100).toFixed(2)
+    );
+
     setShowTable(true);
   };
 
   const downloadExcelSheet = () => {
-    console.log("todo");
     var buttonToClick = document.getElementById("test-table-xls-button");
     buttonToClick.click();
   };
@@ -198,40 +183,70 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    let dollarResult = 0;
+    let dollarResult = dollarBeginningBalance;
     if (endingRentalIncome > 0 && dollarExpensesEndingBalance) {
-      dollarResult = endingRentalIncome - dollarExpensesEndingBalance;
+      console.log("icii");
+      let tmp = endingRentalIncome - dollarExpensesEndingBalance;
+      dollarResult = tmp;
+    } else if (endingRentalIncome > 0) {
+      dollarResult += parseFloat(endingRentalIncome);
+    } else if (dollarExpensesEndingBalance) {
+      dollarResult += parseFloat(dollarExpensesEndingBalance);
     }
-    else if (endingRentalIncome > 0) {
-      dollarResult = endingRentalIncome;
-    }
-    else if (dollarExpensesEndingBalance) {
-      dollarResult = dollarExpensesEndingBalance;
-    }
+    console.log("dollarResult");
+    console.log(dollarResult);
     setDollarEndingBalance(dollarResult);
-
   }, [dollarExpensesEndingBalance]);
 
   useEffect(() => {
-    let euroResult = 0;
-    if (euroExpensesEndingBalance) euroResult = euroExpensesEndingBalance;
+    let euroResult = euroBeginningBalance;
+    if (euroExpensesEndingBalance)
+      euroResult += parseFloat(euroExpensesEndingBalance);
     setEuroEndingBalance(euroResult);
-
   }, [euroExpensesEndingBalance]);
+
+  useEffect(() => {
+    let euroResult = 0;
+    console.log("hello");
+
+    if (euroBeginningBalance) {
+      if (euroExpensesEndingBalance)
+        euroResult =
+          parseFloat(euroExpensesEndingBalance) +
+          parseFloat(euroBeginningBalance);
+      else {
+        euroResult = euroEndingBalance;
+      }
+      setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
+    }
+  }, [euroBeginningBalance]);
+
+  useEffect(() => {
+    let dollarResult = 0;
+
+    if (dollarBeginningBalance) {
+      if (dollarExpensesEndingBalance)
+        dollarResult =
+          parseFloat(dollarExpensesEndingBalance) +
+          parseFloat(dollarBeginningBalance);
+      else {
+        dollarResult = dollarBeginningBalance;
+      }
+      if (endingRentalIncome) dollarResult = endingRentalIncome - dollarResult;
+      setDollarEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
+    }
+  }, [dollarBeginningBalance]);
 
   useEffect(() => {
     let dollarResult = 0;
     if (endingRentalIncome > 0 && dollarExpensesEndingBalance) {
       dollarResult = endingRentalIncome - dollarExpensesEndingBalance;
-    }
-    else if (endingRentalIncome > 0) {
+    } else if (endingRentalIncome > 0) {
       dollarResult = endingRentalIncome;
-    }
-    else if (dollarExpensesEndingBalance) {
+    } else if (dollarExpensesEndingBalance) {
       dollarResult = dollarExpensesEndingBalance;
     }
     setDollarEndingBalance(dollarResult);
-
   }, [endingRentalIncome]);
 
   return (
@@ -249,7 +264,10 @@ function Home() {
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
-            onChange={(e) => setEuroBeginningBalance(e.target.value)}
+            onChange={(e) => {
+              setEuroBeginningBalance(e.target.value);
+              setShowTable(false);
+            }}
           />
         </Form.Group>
         <Form.Group className="mb-3">
@@ -260,7 +278,10 @@ function Home() {
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
-            onChange={(e) => setDollarBeginningBalance(e.target.value)}
+            onChange={(e) => {
+              setDollarBeginningBalance(e.target.value);
+              setShowTable(false);
+            }}
           />
         </Form.Group>
 
@@ -300,7 +321,10 @@ function Home() {
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
-            onChange={(e) => setEuroCession(e.target.value)}
+            onChange={(e) => {
+              setEuroCession(e.target.value);
+              setShowTable(false);
+            }}
           />
         </Form.Group>
 
@@ -314,14 +338,20 @@ function Home() {
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
-            onChange={(e) => setDollarCession(e.target.value)}
+            onChange={(e) => {
+              setDollarCession(e.target.value);
+              setShowTable(false);
+            }}
           />
         </Form.Group>
 
         <div
           key={`inline-radio`}
           className="mb-3"
-          onChange={(e) => setCheckedRadio(e.target.id[e.target.id.length - 1])}
+          onChange={(e) => {
+            setCheckedRadio(e.target.id[e.target.id.length - 1]);
+            setShowTable(false);
+          }}
         >
           <Form.Label htmlFor="inputPassword5">
             Devise achetée (optionnel)
@@ -436,13 +466,13 @@ function Home() {
                   {dollarCession && checkedRadio == 1 && (
                     <>
                       <td> </td>
-                      <td>$ {dollarCession}</td>
+                      <td>USD {dollarCession}</td>
                       <td> </td>
                     </>
                   )}
                   {dollarCession && checkedRadio == 2 && (
                     <>
-                      <td>$ {dollarCession}</td>
+                      <td>USD {dollarCession}</td>
                       <td> </td>
                       <td> </td>
                     </>
@@ -455,7 +485,7 @@ function Home() {
                   {/* ----- */}
                   {euroCession && checkedRadio == 1 && (
                     <>
-                      <td>$ {euroCession}</td>
+                      <td>{euroCession} EUR</td>
                       <td> </td>
                       <td> </td>
                     </>
@@ -463,7 +493,7 @@ function Home() {
                   {euroCession && checkedRadio == 2 && (
                     <>
                       <td> </td>
-                      <td>$ {euroCession}</td>
+                      <td>{euroCession} EUR</td>
                       <td> </td>
                     </>
                   )}
@@ -540,14 +570,35 @@ function Home() {
                   </td>
                 )}
                 {rentalIncomeArray.length == 0 && <td>-</td>}
-                {dollarExpensesEndingBalance && (<td><strong>USD {dollarExpensesEndingBalance}</strong></td>)}
-                {!dollarExpensesEndingBalance &&<td>-</td>}
+                {dollarExpensesEndingBalance && (
+                  <td>
+                    <strong>USD {dollarExpensesEndingBalance}</strong>
+                  </td>
+                )}
+                {!dollarExpensesEndingBalance && <td>-</td>}
                 <td>
                   <strong>USD {dollarEndingBalance}</strong>
                 </td>
-                <td>-</td>
-                {euroExpensesEndingBalance && (<td><strong> {euroExpensesEndingBalance} EUR</strong></td>)}
-                {!euroExpensesEndingBalance &&<td>-</td>}
+
+                {euroExpensesEndingBalance && checkedRadio == 1 && (
+                  <>
+                    <td>
+                      <strong> {euroExpensesEndingBalance} EUR</strong>
+                    </td>
+                    <td></td>
+                  </>
+                )}
+                {!euroExpensesEndingBalance && <td>-</td>}
+
+                {euroExpensesEndingBalance && checkedRadio == 2 && (
+                  <>
+                    <td>-</td>
+                    <td>
+                      <strong> {euroExpensesEndingBalance} EUR</strong>
+                    </td>
+                  </>
+                )}
+                {!euroExpensesEndingBalance && <td>-</td>}
                 <td>
                   <strong> {euroEndingBalance} EUR</strong>
                 </td>
