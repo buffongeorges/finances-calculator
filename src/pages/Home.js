@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Form, Button, Table } from "react-bootstrap";
 import Papa from "papaparse";
 import { TableCSVExporter } from "./TableCSVExporter";
@@ -6,7 +6,6 @@ import ReactHTMLTableToExcel from "react-html-table-to-excel";
 let xlsx = require("json-as-xlsx");
 
 function Home() {
-  const tableRef = useRef(null);
   const [date, setDate] = useState();
   const [today, setToday] = useState();
 
@@ -34,7 +33,24 @@ function Home() {
   const [euroBeginningBalance, setEuroBeginningBalance] = useState(0);
   const [dollarBeginningBalance, setDollarBeginningBalance] = useState(0);
 
-  //State to store the values
+  // A SAVOIR / RETENIR : How to handle ref and useeffect together =>
+  // I wanted to delete the default button when the generate file button was clicked
+  //which means that i needed to know when the default button "Download file" with id test-table-xls-button was injected in the DOM
+  const [ref, setRef] = useState(null);
+
+  const tableRef = useCallback((node) => {
+    setRef(node);
+  }, []);
+
+  useEffect(() => {
+    if (ref) {
+      const el = document.getElementById("test-table-xls-button");
+      if (el !== null) {
+        el.style.visibility = "hidden";
+      }
+    }
+  }, [ref]);
+  
   const [values, setValues] = useState([]);
 
   const dollarChangeHandler = (event) => {
@@ -52,9 +68,6 @@ function Home() {
           rowsArray.push(Object.keys(d));
           valuesArray.push(Object.values(d));
         });
-
-        // Filtered Values
-        // setValues(results.data);
 
         setDollarArray(results.data);
 
@@ -128,8 +141,6 @@ function Home() {
       });
     }
 
-    console.log("checkedRadio");
-    console.log(checkedRadio);
     if (dollarCession && checkedRadio == 1)
       dollarResult += parseFloat(dollarCession);
 
@@ -172,7 +183,6 @@ function Home() {
   };
 
   useEffect(() => {
-    document.getElementById('test-table-xls-button').style.visibility = 'hidden';
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, "0");
     var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -182,6 +192,27 @@ function Home() {
 
     setToday(today);
   }, []);
+
+  function useHookWithRefCallback() {
+    console.log("helloo");
+    const ref = useRef(null);
+    const setRef = useCallback((node) => {
+      if (ref.current) {
+        // Make sure to cleanup any events/references added to the last instance
+        console.log("existe!!");
+      }
+
+      if (node) {
+        // Check if a node is actually passed. Otherwise node would be null.
+        // You can now do what you need to, addEventListeners, measure, etc.
+      }
+
+      // Save a reference to the node
+      ref.current = node;
+    }, []);
+
+    return [setRef];
+  }
 
   useEffect(() => {
     let dollarResult = dollarBeginningBalance;
@@ -394,6 +425,7 @@ function Home() {
             buttonText="Download File"
           />
           <Table
+            ref={tableRef}
             id="dataTable"
             style={{
               marginLeft: "2rem",
