@@ -9,12 +9,19 @@ function Home() {
   const tableRef = useRef(null);
   const [date, setDate] = useState();
   const [today, setToday] = useState();
-  const [euroEndingBalance, setEuroEndingBalance] = useState(0);
-  const [dollarEndingBalance, setDollarEndingBalance] = useState(0);
-  const [endingRentalIncome, setEndingRentalIncome] = useState(0);
-  const [rentalIncomeArray, setRentalIncomeArray] = useState([]);
+
+  const [euroEndingBalance, setEuroEndingBalance] = useState(null);
+  const [euroExpensesEndingBalance, setEuroExpensesEndingBalance] = useState(0);
+  const [euroIncomesEndingBalance, setEuroIncomesEndingBalance] = useState(0);
+
+  const [dollarEndingBalance, setDollarEndingBalance] = useState(null);
+  const [dollarExpensesEndingBalance, setDollarExpensesEndingBalance] = useState(null);
+  const [dollarIncomesEndingBalance, setDollarIncomesEndingBalance] = useState(null);
+  const [endingRentalIncome, setEndingRentalIncome] = useState(null);
+
   const [showTable, setShowTable] = useState(false);
   const [euroArray, setEuroArray] = useState();
+  const [rentalIncomeArray, setRentalIncomeArray] = useState([]);
   const [dollarArray, setDollarArray] = useState();
 
   const [checkedRadio, setCheckedRadio] = useState(1);
@@ -51,7 +58,6 @@ function Home() {
 
         setDollarArray(results.data);
 
-        //START TEST
         let newArray = values.concat(results.data);
         console.log("before sort");
         console.log(newArray);
@@ -65,7 +71,7 @@ function Home() {
         console.log(newArray);
 
         setValues(newArray);
-        //END TESTS
+       
       },
     });
   };
@@ -142,16 +148,20 @@ function Home() {
     if (dollarCession) dollarResult += parseFloat(dollarCession);
 
     // setDollarEndingBalance(dollarResult);
-    setDollarEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
-
+    setDollarExpensesEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalIncomeResult += parseFloat(val.Amount);
       });
     }
-    setEndingRentalIncome(
-      (Math.round(rentalIncomeResult * 100) / 100).toFixed(2)
-    );
+    
+    if (rentalIncomeArray.length > 0)
+    {
+      setEndingRentalIncome(
+        (Math.round(rentalIncomeResult * 100) / 100).toFixed(2)
+      );
+    }
+    
 
     // setShowTable(true);
 
@@ -165,7 +175,8 @@ function Home() {
 
     if (euroCession) euroResult += parseFloat(euroCession);
 
-    setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
+    setEuroExpensesEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
+    
     setShowTable(true);
   };
 
@@ -185,6 +196,43 @@ function Home() {
 
     setToday(today);
   }, []);
+
+  useEffect(() => {
+    let dollarResult = 0;
+    if (endingRentalIncome > 0 && dollarExpensesEndingBalance) {
+      dollarResult = endingRentalIncome - dollarExpensesEndingBalance;
+    }
+    else if (endingRentalIncome > 0) {
+      dollarResult = endingRentalIncome;
+    }
+    else if (dollarExpensesEndingBalance) {
+      dollarResult = dollarExpensesEndingBalance;
+    }
+    setDollarEndingBalance(dollarResult);
+
+  }, [dollarExpensesEndingBalance]);
+
+  useEffect(() => {
+    let euroResult = 0;
+    if (euroExpensesEndingBalance) euroResult = euroExpensesEndingBalance;
+    setEuroEndingBalance(euroResult);
+
+  }, [euroExpensesEndingBalance]);
+
+  useEffect(() => {
+    let dollarResult = 0;
+    if (endingRentalIncome > 0 && dollarExpensesEndingBalance) {
+      dollarResult = endingRentalIncome - dollarExpensesEndingBalance;
+    }
+    else if (endingRentalIncome > 0) {
+      dollarResult = endingRentalIncome;
+    }
+    else if (dollarExpensesEndingBalance) {
+      dollarResult = dollarExpensesEndingBalance;
+    }
+    setDollarEndingBalance(dollarResult);
+
+  }, [endingRentalIncome]);
 
   return (
     <div className="App">
@@ -223,9 +271,6 @@ function Home() {
             placeholder="Enter email"
             onChange={rentalIncomeChangeHandler}
           />
-          {/* <Form.Text className="text-muted">
-            Example : We'll never share your incomes with anyone else.
-          </Form.Text> */}
         </Form.Group>
         <Form.Group className="mb-5">
           <Form.Label>Choisissez le fichier Dépenses USD</Form.Label>
@@ -234,9 +279,6 @@ function Home() {
             placeholder="Enter email"
             onChange={dollarChangeHandler}
           />
-          {/* <Form.Text className="text-muted">
-            Example : We'll never share your incomes with anyone else.
-          </Form.Text> */}
         </Form.Group>
 
         <Form.Group className="mb-5">
@@ -246,9 +288,6 @@ function Home() {
             placeholder="Enter email"
             onChange={euroChangeHandler}
           />
-          {/* <Form.Text className="text-muted">
-            Example : We'll never share your expenses with anyone else.
-          </Form.Text> */}
         </Form.Group>
 
         <Form.Group className="mb-3">
@@ -501,12 +540,14 @@ function Home() {
                   </td>
                 )}
                 {rentalIncomeArray.length == 0 && <td>-</td>}
-                <td>-</td>
+                {dollarExpensesEndingBalance && (<td><strong>USD {dollarExpensesEndingBalance}</strong></td>)}
+                {!dollarExpensesEndingBalance &&<td>-</td>}
                 <td>
                   <strong>USD {dollarEndingBalance}</strong>
                 </td>
                 <td>-</td>
-                <td>-</td>
+                {euroExpensesEndingBalance && (<td><strong> {euroExpensesEndingBalance} EUR</strong></td>)}
+                {!euroExpensesEndingBalance &&<td>-</td>}
                 <td>
                   <strong> {euroEndingBalance} EUR</strong>
                 </td>
