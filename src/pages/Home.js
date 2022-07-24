@@ -18,7 +18,8 @@ function Home() {
     useState(null);
   const [dollarIncomesEndingBalance, setDollarIncomesEndingBalance] =
     useState(null);
-  const [endingRentalIncome, setEndingRentalIncome] = useState(null);
+  const [endingDollarRentalIncome, setDollarEndingRentalIncome] = useState(null);
+  const [endingEuroRentalIncome, setEuroEndingRentalIncome] = useState(null);
 
   const [showTable, setShowTable] = useState(false);
   const [euroArray, setEuroArray] = useState();
@@ -129,11 +130,10 @@ function Home() {
 
     today = mm + "-" + dd + "-" + yyyy;
     setDate(today);
-    console.log("euroBeginningBalance");
-    console.log(euroBeginningBalance);
     let dollarResult = parseFloat(0);
     let euroResult = parseFloat(0);
-    let rentalIncomeResult = parseFloat(0);
+    let rentalDollarIncomeResult = parseFloat(0);
+    let rentalEuroIncomeResult = parseFloat(0);
 
     if (dollarArray) {
       dollarArray.forEach((val) => {
@@ -148,19 +148,24 @@ function Home() {
       (Math.round(dollarResult * 100) / 100).toFixed(2)
     );
 
+    //dollar rental income
+
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
-        rentalIncomeResult += parseFloat(val.Amount);
+        rentalDollarIncomeResult += parseFloat(val.Amount);
       });
       if (dollarCession && checkedRadio == 2)
-        rentalIncomeResult += parseFloat(dollarCession);
+        rentalDollarIncomeResult += parseFloat(dollarCession);
     }
 
-    if (rentalIncomeArray.length > 0) {
-      setEndingRentalIncome(
-        (Math.round(rentalIncomeResult * 100) / 100).toFixed(2)
+    if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult) {
+      setDollarEndingRentalIncome(
+        (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
       );
     }
+
+    //euro rental income
+    console.log()
 
     if (euroArray) {
       euroArray.forEach((val) => {
@@ -168,11 +173,25 @@ function Home() {
       });
     }
 
-    if (euroCession) euroResult += parseFloat(euroCession);
+    if (euroCession && checkedRadio == 2) {
+      // no rental income for euros
+      euroResult += parseFloat(euroCession);
+      setEuroEndingRentalIncome(null)
+    }
+
+    else if (euroCession && checkedRadio == 1) {
+      rentalEuroIncomeResult += parseFloat(euroCession);
+      setEuroEndingRentalIncome(rentalEuroIncomeResult);
+    } 
 
     setEuroExpensesEndingBalance(
       (Math.round(euroResult * 100) / 100).toFixed(2)
     );
+
+    console.log('endingEuroRentalIncome')
+    console.log(endingEuroRentalIncome)
+    console.log('euroExpensesEndingBalance')
+    console.log(euroExpensesEndingBalance)
 
     setShowTable(true);
   };
@@ -194,7 +213,6 @@ function Home() {
   }, []);
 
   function useHookWithRefCallback() {
-    console.log("helloo");
     const ref = useRef(null);
     const setRef = useCallback((node) => {
       if (ref.current) {
@@ -216,30 +234,36 @@ function Home() {
 
   useEffect(() => {
     let dollarResult = dollarBeginningBalance;
-    if (endingRentalIncome > 0 && dollarExpensesEndingBalance) {
+    if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
       console.log("icii");
-      let tmp = endingRentalIncome - dollarExpensesEndingBalance;
+      let tmp = endingDollarRentalIncome - dollarExpensesEndingBalance;
       dollarResult = tmp;
-    } else if (endingRentalIncome > 0) {
-      dollarResult += parseFloat(endingRentalIncome);
+    } else if (endingDollarRentalIncome > 0) {
+      dollarResult += parseFloat(endingDollarRentalIncome);
     } else if (dollarExpensesEndingBalance) {
       dollarResult += parseFloat(dollarExpensesEndingBalance);
     }
     console.log("dollarResult");
     console.log(dollarResult);
-    setDollarEndingBalance(dollarResult);
+    setDollarEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
   }, [dollarExpensesEndingBalance]);
 
   useEffect(() => {
     let euroResult = euroBeginningBalance;
-    if (euroExpensesEndingBalance)
+    if (endingEuroRentalIncome > 0 && euroExpensesEndingBalance) {
+      let tmp = endingEuroRentalIncome - euroExpensesEndingBalance;
+      euroResult = tmp;
+    }
+    else if (endingEuroRentalIncome > 0) {
+      euroResult += parseFloat(endingEuroRentalIncome);
+    } else if (euroExpensesEndingBalance) {
       euroResult += parseFloat(euroExpensesEndingBalance);
-    setEuroEndingBalance(euroResult);
+    }
+    setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
   }, [euroExpensesEndingBalance]);
 
   useEffect(() => {
     let euroResult = 0;
-    console.log("hello");
 
     if (euroBeginningBalance) {
       if (euroExpensesEndingBalance)
@@ -249,8 +273,8 @@ function Home() {
       else {
         euroResult = euroEndingBalance;
       }
-      setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
-    }
+      if (endingEuroRentalIncome) euroResult = endingEuroRentalIncome - euroResult;
+      setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));    }
   }, [euroBeginningBalance]);
 
   useEffect(() => {
@@ -264,22 +288,22 @@ function Home() {
       else {
         dollarResult = dollarBeginningBalance;
       }
-      if (endingRentalIncome) dollarResult = endingRentalIncome - dollarResult;
+      if (endingDollarRentalIncome) dollarResult = endingDollarRentalIncome - dollarResult;
       setDollarEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
     }
   }, [dollarBeginningBalance]);
 
   useEffect(() => {
     let dollarResult = 0;
-    if (endingRentalIncome > 0 && dollarExpensesEndingBalance) {
-      dollarResult = endingRentalIncome - dollarExpensesEndingBalance;
-    } else if (endingRentalIncome > 0) {
-      dollarResult = endingRentalIncome;
+    if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
+      dollarResult = endingDollarRentalIncome - dollarExpensesEndingBalance;
+    } else if (endingDollarRentalIncome > 0) {
+      dollarResult = endingDollarRentalIncome;
     } else if (dollarExpensesEndingBalance) {
       dollarResult = dollarExpensesEndingBalance;
     }
-    setDollarEndingBalance(dollarResult);
-  }, [endingRentalIncome]);
+    setDollarEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
+  }, [endingDollarRentalIncome]);
 
   return (
     <div className="App">
@@ -499,13 +523,13 @@ function Home() {
                   {dollarCession && checkedRadio == 1 && (
                     <>
                       <td> </td>
-                      <td>USD {dollarCession}</td>
+                      <td><strong>USD {dollarCession}</strong></td>
                       <td> </td>
                     </>
                   )}
                   {dollarCession && checkedRadio == 2 && (
                     <>
-                      <td>USD {dollarCession}</td>
+                      <td><strong>USD {dollarCession}</strong></td>
                       <td> </td>
                       <td> </td>
                     </>
@@ -518,7 +542,7 @@ function Home() {
                   {/* ----- */}
                   {euroCession && checkedRadio == 1 && (
                     <>
-                      <td>{euroCession} EUR</td>
+                      <td><strong>{euroCession} EUR</strong></td>
                       <td> </td>
                       <td> </td>
                     </>
@@ -526,7 +550,7 @@ function Home() {
                   {euroCession && checkedRadio == 2 && (
                     <>
                       <td> </td>
-                      <td>{euroCession} EUR</td>
+                      <td><strong>{euroCession} EUR</strong></td>
                       <td> </td>
                     </>
                   )}
@@ -597,12 +621,12 @@ function Home() {
                 <td>
                   <strong>Solde de cloture</strong>
                 </td>
-                {rentalIncomeArray.length > 0 && (
+                {(endingDollarRentalIncome) && (
                   <td>
-                    <strong>USD {endingRentalIncome}</strong>
+                    <strong>USD {endingDollarRentalIncome}</strong>
                   </td>
                 )}
-                {rentalIncomeArray.length == 0 && <td>-</td>}
+                {!endingDollarRentalIncome && <td>-</td>}
                 {dollarExpensesEndingBalance && (
                   <td>
                     <strong>USD {dollarExpensesEndingBalance}</strong>
@@ -616,19 +640,20 @@ function Home() {
                 {euroExpensesEndingBalance && checkedRadio == 1 && (
                   <>
                     <td>
-                      <strong> {euroExpensesEndingBalance} EUR</strong>
+                      <strong> {endingEuroRentalIncome} EUR</strong>
                     </td>
-                    <td></td>
+                    <td><strong>{euroExpensesEndingBalance} EUR</strong></td>
                   </>
                 )}
                 {!euroExpensesEndingBalance && <td>-</td>}
 
                 {euroExpensesEndingBalance && checkedRadio == 2 && (
                   <>
-                    <td>-</td>
                     <td>
-                      <strong> {euroExpensesEndingBalance} EUR</strong>
+                      {endingEuroRentalIncome &&(<strong> {endingEuroRentalIncome} EUR</strong>)}
+                      {!endingEuroRentalIncome && <></>}
                     </td>
+                    <td><strong>{euroExpensesEndingBalance} EUR</strong></td>
                   </>
                 )}
                 {!euroExpensesEndingBalance && <td>-</td>}
