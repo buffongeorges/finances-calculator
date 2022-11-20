@@ -7,11 +7,16 @@ function Home() {
   const [date, setDate] = useState();
   const [today, setToday] = useState();
 
+  //beginning balances
+  const [euroBeginningBalance, setEuroBeginningBalance] = useState(0);
+  const [dollarBeginningBalance, setDollarBeginningBalance] = useState(0);
+
+  //ending balances 
   const [euroEndingBalance, setEuroEndingBalance] = useState(null);
+  const [dollarEndingBalance, setDollarEndingBalance] = useState(null);
   const [euroExpensesEndingBalance, setEuroExpensesEndingBalance] = useState(0);
   const [euroIncomesEndingBalance, setEuroIncomesEndingBalance] = useState(0);
 
-  const [dollarEndingBalance, setDollarEndingBalance] = useState(null);
   const [dollarExpensesEndingBalance, setDollarExpensesEndingBalance] =
     useState(null);
   const [dollarIncomesEndingBalance, setDollarIncomesEndingBalance] =
@@ -28,9 +33,6 @@ function Home() {
 
   const [euroCession, setEuroCession] = useState(null);
   const [dollarCession, setDollarCession] = useState(null);
-
-  const [euroBeginningBalance, setEuroBeginningBalance] = useState(0);
-  const [dollarBeginningBalance, setDollarBeginningBalance] = useState(0);
 
   // A SAVOIR / RETENIR : How to handle ref and useeffect together =>
   // I wanted to delete the default button when the generate file button was clicked
@@ -183,12 +185,6 @@ function Home() {
     setEuroExpensesEndingBalance(
       (Math.round(euroResult * 100) / 100).toFixed(2)
     );
-
-    console.log('endingEuroRentalIncome')
-    console.log(endingEuroRentalIncome)
-    console.log('euroExpensesEndingBalance')
-    console.log(euroExpensesEndingBalance)
-
     setShowTable(true);
   };
 
@@ -234,20 +230,14 @@ function Home() {
       console.log("dans le if");
       console.log(dollarResult)
       let tmp = endingDollarRentalIncome - dollarExpensesEndingBalance;
-      dollarResult = tmp;
+      // dollarResult = tmp;
+      dollarResult = parseFloat(tmp) + parseFloat(dollarBeginningBalance);
     } else if (endingDollarRentalIncome > 0) {
       console.log("dans le else if 1");
       console.log(dollarResult)
       // dollarResult += parseFloat(endingDollarRentalIncome);
       dollarResult = parseFloat(dollarResult) + parseFloat(endingDollarRentalIncome);
     } else if (dollarExpensesEndingBalance) {
-      console.log("dans le else if 2");
-      console.log(dollarResult)
-      console.log(typeof dollarResult)
-      console.log("dollarExpensesEndingBalance")
-      console.log(dollarExpensesEndingBalance)
-      console.log(typeof dollarExpensesEndingBalance)
-
       dollarResult = parseFloat(dollarResult) + parseFloat(dollarExpensesEndingBalance);
       // dollarResult += parseFloat(dollarExpensesEndingBalance);
     }
@@ -290,7 +280,6 @@ function Home() {
 
   useEffect(() => {
     let dollarResult = 0;
-
     if (dollarBeginningBalance) {
       if (dollarExpensesEndingBalance)
         dollarResult =
@@ -305,13 +294,15 @@ function Home() {
   }, [dollarBeginningBalance]);
 
   useEffect(() => {
-    let dollarResult = 0;
+    console.log('on va faire le calcul...');
+    console.log(dollarBeginningBalance)
+    let dollarResult = dollarBeginningBalance;
     if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
-      dollarResult = endingDollarRentalIncome - dollarExpensesEndingBalance;
+      dollarResult = parseFloat(dollarResult) + parseFloat(endingDollarRentalIncome) - parseFloat(dollarExpensesEndingBalance);
     } else if (endingDollarRentalIncome > 0) {
-      dollarResult = endingDollarRentalIncome;
+      dollarResult = parseFloat(dollarResult) + parseFloat(endingDollarRentalIncome);
     } else if (dollarExpensesEndingBalance) {
-      dollarResult = dollarExpensesEndingBalance;
+      dollarResult = parseFloat(dollarResult) + parseFloat(dollarExpensesEndingBalance);
     }
     setDollarEndingBalance((Math.round(dollarResult * 100) / 100).toFixed(2));
   }, [endingDollarRentalIncome]);
@@ -342,9 +333,9 @@ function Home() {
         <Button
           variant="secondary"
           type="submit"
-          style={{marginBottom: '1rem'}}
-          onClick={() => { 
-            window.location.reload(); 
+          style={{ marginBottom: '1rem' }}
+          onClick={() => {
+            window.location.reload();
           }}
         >
           Restart
@@ -356,11 +347,18 @@ function Home() {
             defaultValue={0}
             type="number"
             maxLength={10}
+            min="0"
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
             onChange={(e) => {
               setEuroBeginningBalance(e.target.value);
               setShowTable(false);
+            }}
+            onKeyPress={(event) => {
+              if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+                alert('You can only enter numbers !')
+              }
             }}
           />
         </Form.Group>
@@ -368,6 +366,7 @@ function Home() {
           <Form.Label htmlFor="inputPassword5">USD Beginning balance / Solde initial USD</Form.Label>
           <Form.Control
             type="number"
+            min="0"
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -376,11 +375,17 @@ function Home() {
               setDollarBeginningBalance(e.target.value);
               setShowTable(false);
             }}
+            onKeyPress={(event) => {
+              if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+                alert('You can only enter numbers !')
+              }
+            }}
           />
         </Form.Group>
 
         <Form.Group className="mb-5">
-          <Form.Label>Select the <strong>Income USD </strong> file / Choisissez le fichier <strong>Recettes USD </strong>
+          <Form.Label>Select the <strong>Income USD (payments collected)</strong> file / Choisissez le fichier <strong>Recettes USD </strong>
             <br />
             <strong>ATTENTION : CSV format</strong></Form.Label>
 
@@ -418,6 +423,7 @@ function Home() {
           </Form.Label>
           <Form.Control
             type="number"
+            min="0"
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -425,6 +431,12 @@ function Home() {
             onChange={(e) => {
               setEuroCession(e.target.value);
               setShowTable(false);
+            }}
+            onKeyPress={(event) => {
+              if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+                alert('You can only enter numbers !')
+              }
             }}
           />
         </Form.Group>
@@ -435,6 +447,7 @@ function Home() {
           </Form.Label>
           <Form.Control
             type="number"
+            min="0"
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -442,6 +455,12 @@ function Home() {
             onChange={(e) => {
               setDollarCession(e.target.value);
               setShowTable(false);
+            }}
+            onKeyPress={(event) => {
+              if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+                alert('You can only enter numbers !')
+              }
             }}
           />
         </Form.Group>
@@ -478,6 +497,7 @@ function Home() {
           variant="primary"
           type="submit"
           onClick={() => generateCustomReport()}
+          style={{ marginBottom: '1rem' }}
         >
           Generate file
         </Button>
