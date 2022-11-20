@@ -318,10 +318,37 @@ function Home() {
 
   return (
     <div className="App">
-      <div style={{ marginLeft: "2rem", marginRight: "2rem" }}>
-        <center>
-          <h1>Calculateur 🤑</h1>
-        </center>
+      <div style={{ marginLeft: "2rem", marginRight: "2rem", marginTop: '-1.5rem' }}>
+
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row',
+          marginTop: '0rem',
+          marginBottom: '2rem'
+        }}>
+          <img
+            src={require('../images/the-property-ink-autumn.png')}
+            style={{ width: "35%", maxHeight: "20%" }}
+          />
+          <div style={{ alignSelf: 'flex-end', fontSize: '2rem' }}>
+            <strong>
+              Calculator
+            </strong>
+          </div>
+        </div>
+
+        <Button
+          variant="secondary"
+          type="submit"
+          style={{marginBottom: '1rem'}}
+          onClick={() => { 
+            window.location.reload(); 
+          }}
+        >
+          Restart
+        </Button>
 
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">EUR Beginning balance / Solde initial EUR</Form.Label>
@@ -365,7 +392,7 @@ function Home() {
         </Form.Group>
         <Form.Group className="mb-5">
           <Form.Label>Select the <strong>Expense USD </strong> file / Choisissez le fichier <strong>Dépenses USD </strong>
-          <br />
+            <br />
             <strong>ATTENTION : CSV format</strong></Form.Label>
           <Form.Control
             type="file"
@@ -376,7 +403,7 @@ function Home() {
 
         <Form.Group className="mb-5">
           <Form.Label>Select the <strong>Expense EURO </strong>file / Choisissez le fichier <strong>Dépenses EURO</strong>
-          <br />
+            <br />
             <strong>ATTENTION : CSV format</strong></Form.Label>
           <Form.Control
             type="file"
@@ -454,257 +481,261 @@ function Home() {
         >
           Generate file
         </Button>
-      </div>
+      </div >
 
-      {showTable && (
-        <>
-          <ReactHTMLTableToExcel
-            id="test-table-xls-button"
-            className="download-table-xls-button"
-            table="dataTable"
-            filename={`property-ink-export-${date}`}
-            sheet="tablexls"
-            buttonText="Download File"
-          />
-          <Table
-            ref={tableRef}
-            id="dataTable"
+      {
+        showTable && (
+          <>
+            <ReactHTMLTableToExcel
+              id="test-table-xls-button"
+              className="download-table-xls-button"
+              table="dataTable"
+              filename={`property-ink-export-${date}`}
+              sheet="tablexls"
+              buttonText="Download File"
+            />
+            <Table
+              ref={tableRef}
+              id="dataTable"
+              style={{
+                marginLeft: "2rem",
+                marginRight: "2rem",
+                marginTop: "2rem",
+              }}
+              striped
+              bordered
+              hover
+            >
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Income USD / Recettes USD</th>
+                  <th>Expense USD / Depenses USD</th>
+                  <th>Balance USD / Solde USD</th>
+                  <th>Income EURO / Recettes EURO</th>
+                  <th>Expense EURO / Depenses EURO</th>
+                  <th>Balance EURO / Solde EURO</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Beginning Balance */}
+                <tr>
+                  <td></td>
+                  <td>Beginning balance / Solde initial</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>
+                    <strong>USD {dollarBeginningBalance} </strong>
+                  </td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>
+                    <strong>{euroBeginningBalance} EUR</strong>
+                  </td>
+                </tr>
+
+                {/* Rental Income */}
+                <tr>
+                  <td></td>
+                  <td>
+                    {" "}
+                    <strong>Rental Income </strong>
+                  </td>
+                </tr>
+
+                {rentalIncomeArray.map((value, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{value.Date}</td>
+                      <td>{value["Client Name"]}</td>
+                      <td>USD {value.Amount}</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+                  );
+                })}
+
+                {/* Cession de devises */}
+                {(dollarCession || euroCession) && (
+                  <tr>
+                    <td> </td>
+                    <td>
+                      <strong>Cession de devises</strong>
+                    </td>
+                    {dollarCession && checkedRadio == 1 && (
+                      <>
+                        <td> </td>
+                        <td><strong>USD {dollarCession}</strong></td>
+                        <td> </td>
+                      </>
+                    )}
+                    {dollarCession && checkedRadio == 2 && (
+                      <>
+                        <td><strong>USD {dollarCession}</strong></td>
+                        <td> </td>
+                        <td> </td>
+                      </>
+                    )}
+                    {!dollarCession && (
+                      <>
+                        <td> </td> <td> </td> <td> </td>
+                      </>
+                    )}
+                    {/* ----- */}
+                    {euroCession && checkedRadio == 1 && (
+                      <>
+                        <td><strong>{euroCession} EUR</strong></td>
+                        <td> </td>
+                        <td> </td>
+                      </>
+                    )}
+                    {euroCession && checkedRadio == 2 && (
+                      <>
+                        <td> </td>
+                        <td><strong>{euroCession} EUR</strong></td>
+                        <td> </td>
+                      </>
+                    )}
+                    {!euroCession && (
+                      <>
+                        <td> </td> <td> </td> <td> </td>
+                      </>
+                    )}
+                  </tr>
+                )}
+
+                <tr>
+                  <td>-</td>
+                  <td>
+                    <strong>{values[0]["Parent Category"]}</strong>
+                  </td>
+                </tr>
+                {values.map((value, index) => {
+                  return (
+                    <>
+                      {index >= 1 &&
+                        value["Parent Category"].localeCompare(
+                          values[index - 1]["Parent Category"]
+                        ) != 0 && (
+                          <tr>
+                            <td>-</td>
+                            <td>
+                              <strong>{value["Parent Category"]}</strong>
+                            </td>
+                            <td> </td>
+                            <td> </td>
+                            <td> </td>
+                            <td> </td>
+                            <td> </td>
+                            <td> </td>
+                          </tr>
+                        )}
+
+                      {value.Currency == "EUR" && (
+                        <tr key={index}>
+                          <td>{value.Date}</td>
+                          <td>{value.Merchant}</td>
+                          <td>-</td>
+                          <td>-</td>
+                          <td>-</td>
+                          <td>-</td>
+                          <td>{value.Amount}</td>
+                          <td>-</td>
+                        </tr>
+                      )}
+                      {value.Currency == "USD" && (
+                        <tr key={index}>
+                          <td>{value.Date}</td>
+                          <td>{value.Merchant}</td>
+                          <td>-</td>
+                          <td>{value.Amount}</td>
+                          <td>-</td>
+                          <td>-</td>
+                          <td>-</td>
+                          <td>-</td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })}
+                <tr>
+                  <td></td>
+                  <td>
+                    <strong>Ending balance / Solde de cloture</strong>
+                  </td>
+                  {(endingDollarRentalIncome) && (
+                    <td>
+                      <strong>USD {endingDollarRentalIncome}</strong>
+                    </td>
+                  )}
+                  {!endingDollarRentalIncome && <td>-</td>}
+                  {dollarExpensesEndingBalance && (
+                    <td>
+                      <strong>USD {dollarExpensesEndingBalance}</strong>
+                    </td>
+                  )}
+                  {!dollarExpensesEndingBalance && <td>-</td>}
+                  <td>
+                    <strong>USD {dollarEndingBalance}</strong>
+                  </td>
+
+                  {euroExpensesEndingBalance && checkedRadio == 1 && (
+                    <>
+                      <td>
+                        <strong> {endingEuroRentalIncome} EUR</strong>
+                      </td>
+                      <td><strong>{euroExpensesEndingBalance} EUR</strong></td>
+                    </>
+                  )}
+                  {!euroExpensesEndingBalance && <td>-</td>}
+
+                  {euroExpensesEndingBalance && checkedRadio == 2 && (
+                    <>
+                      <td>
+                        {endingEuroRentalIncome && (<strong> {endingEuroRentalIncome} EUR</strong>)}
+                        {!endingEuroRentalIncome && <></>}
+                      </td>
+                      <td><strong>{euroExpensesEndingBalance} EUR</strong></td>
+                    </>
+                  )}
+                  {!euroExpensesEndingBalance && <td>-</td>}
+                  <td>
+                    <strong> {euroEndingBalance} EUR</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Account Managed by</td>
+                  <td>ROGERS Line</td>
+                </tr>
+                <tr>
+                  <td>Report generated on</td>
+                  <td>{today}</td>
+                </tr>
+              </tbody>
+            </Table>
+          </>
+        )
+      }
+      {
+        showTable && (
+          <Button
             style={{
               marginLeft: "2rem",
               marginRight: "2rem",
               marginTop: "2rem",
+              marginBottom: "2rem",
             }}
-            striped
-            bordered
-            hover
+            onClick={() => downloadExcelSheet()}
           >
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Income USD / Recettes USD</th>
-                <th>Expense USD / Depenses USD</th>
-                <th>Balance USD / Solde USD</th>
-                <th>Income EURO / Recettes EURO</th>
-                <th>Expense EURO / Depenses EURO</th>
-                <th>Balance EURO / Solde EURO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Beginning Balance */}
-              <tr>
-                <td></td>
-                <td>Beginning balance / Solde initial</td>
-                <td>-</td>
-                <td>-</td>
-                <td>
-                  <strong>USD {dollarBeginningBalance} </strong>
-                </td>
-                <td>-</td>
-                <td>-</td>
-                <td>
-                  <strong>{euroBeginningBalance} EUR</strong>
-                </td>
-              </tr>
-
-              {/* Rental Income */}
-              <tr>
-                <td></td>
-                <td>
-                  {" "}
-                  <strong>Rental Income </strong>
-                </td>
-              </tr>
-
-              {rentalIncomeArray.map((value, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{value.Date}</td>
-                    <td>{value["Client Name"]}</td>
-                    <td>USD {value.Amount}</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                  </tr>
-                );
-              })}
-
-              {/* Cession de devises */}
-              {(dollarCession || euroCession) && (
-                <tr>
-                  <td> </td>
-                  <td>
-                    <strong>Cession de devises</strong>
-                  </td>
-                  {dollarCession && checkedRadio == 1 && (
-                    <>
-                      <td> </td>
-                      <td><strong>USD {dollarCession}</strong></td>
-                      <td> </td>
-                    </>
-                  )}
-                  {dollarCession && checkedRadio == 2 && (
-                    <>
-                      <td><strong>USD {dollarCession}</strong></td>
-                      <td> </td>
-                      <td> </td>
-                    </>
-                  )}
-                  {!dollarCession && (
-                    <>
-                      <td> </td> <td> </td> <td> </td>
-                    </>
-                  )}
-                  {/* ----- */}
-                  {euroCession && checkedRadio == 1 && (
-                    <>
-                      <td><strong>{euroCession} EUR</strong></td>
-                      <td> </td>
-                      <td> </td>
-                    </>
-                  )}
-                  {euroCession && checkedRadio == 2 && (
-                    <>
-                      <td> </td>
-                      <td><strong>{euroCession} EUR</strong></td>
-                      <td> </td>
-                    </>
-                  )}
-                  {!euroCession && (
-                    <>
-                      <td> </td> <td> </td> <td> </td>
-                    </>
-                  )}
-                </tr>
-              )}
-
-              <tr>
-                <td>-</td>
-                <td>
-                  <strong>{values[0]["Parent Category"]}</strong>
-                </td>
-              </tr>
-              {values.map((value, index) => {
-                return (
-                  <>
-                    {index >= 1 &&
-                      value["Parent Category"].localeCompare(
-                        values[index - 1]["Parent Category"]
-                      ) != 0 && (
-                        <tr>
-                          <td>-</td>
-                          <td>
-                            <strong>{value["Parent Category"]}</strong>
-                          </td>
-                          <td> </td>
-                          <td> </td>
-                          <td> </td>
-                          <td> </td>
-                          <td> </td>
-                          <td> </td>
-                        </tr>
-                      )}
-
-                    {value.Currency == "EUR" && (
-                      <tr key={index}>
-                        <td>{value.Date}</td>
-                        <td>{value.Merchant}</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>{value.Amount}</td>
-                        <td>-</td>
-                      </tr>
-                    )}
-                    {value.Currency == "USD" && (
-                      <tr key={index}>
-                        <td>{value.Date}</td>
-                        <td>{value.Merchant}</td>
-                        <td>-</td>
-                        <td>{value.Amount}</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                      </tr>
-                    )}
-                  </>
-                );
-              })}
-              <tr>
-                <td></td>
-                <td>
-                  <strong>Ending balance / Solde de cloture</strong>
-                </td>
-                {(endingDollarRentalIncome) && (
-                  <td>
-                    <strong>USD {endingDollarRentalIncome}</strong>
-                  </td>
-                )}
-                {!endingDollarRentalIncome && <td>-</td>}
-                {dollarExpensesEndingBalance && (
-                  <td>
-                    <strong>USD {dollarExpensesEndingBalance}</strong>
-                  </td>
-                )}
-                {!dollarExpensesEndingBalance && <td>-</td>}
-                <td>
-                  <strong>USD {dollarEndingBalance}</strong>
-                </td>
-
-                {euroExpensesEndingBalance && checkedRadio == 1 && (
-                  <>
-                    <td>
-                      <strong> {endingEuroRentalIncome} EUR</strong>
-                    </td>
-                    <td><strong>{euroExpensesEndingBalance} EUR</strong></td>
-                  </>
-                )}
-                {!euroExpensesEndingBalance && <td>-</td>}
-
-                {euroExpensesEndingBalance && checkedRadio == 2 && (
-                  <>
-                    <td>
-                      {endingEuroRentalIncome && (<strong> {endingEuroRentalIncome} EUR</strong>)}
-                      {!endingEuroRentalIncome && <></>}
-                    </td>
-                    <td><strong>{euroExpensesEndingBalance} EUR</strong></td>
-                  </>
-                )}
-                {!euroExpensesEndingBalance && <td>-</td>}
-                <td>
-                  <strong> {euroEndingBalance} EUR</strong>
-                </td>
-              </tr>
-              <tr>
-                <td>Account Managed by</td>
-                <td>ROGERS Line</td>
-              </tr>
-              <tr>
-                <td>Report generated on</td>
-                <td>{today}</td>
-              </tr>
-            </tbody>
-          </Table>
-        </>
-      )}
-      {showTable && (
-        <Button
-          style={{
-            marginLeft: "2rem",
-            marginRight: "2rem",
-            marginTop: "2rem",
-            marginBottom: "2rem",
-          }}
-          onClick={() => downloadExcelSheet()}
-        >
-          Download File
-        </Button>
-      )}
-    </div>
+            Download File
+          </Button>
+        )
+      }
+    </div >
   );
 }
 
