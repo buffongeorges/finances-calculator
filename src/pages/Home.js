@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Form, Button, Table } from "react-bootstrap";
 import Papa from "papaparse";
-import { TableCSVExporter } from "./TableCSVExporter";
 import ReactHTMLTableToExcel from "react-html-table-to-excel";
-let xlsx = require("json-as-xlsx");
 
 function Home() {
   const [date, setDate] = useState();
@@ -51,7 +49,7 @@ function Home() {
       }
     }
   }, [ref]);
-  
+
   const [values, setValues] = useState([]);
 
   const dollarChangeHandler = (event) => {
@@ -165,8 +163,6 @@ function Home() {
     }
 
     //euro rental income
-    console.log()
-
     if (euroArray) {
       euroArray.forEach((val) => {
         euroResult += parseFloat(val.Amount);
@@ -182,7 +178,7 @@ function Home() {
     else if (euroCession && checkedRadio == 1) {
       rentalEuroIncomeResult += parseFloat(euroCession);
       setEuroEndingRentalIncome(rentalEuroIncomeResult);
-    } 
+    }
 
     setEuroExpensesEndingBalance(
       (Math.round(euroResult * 100) / 100).toFixed(2)
@@ -235,13 +231,25 @@ function Home() {
   useEffect(() => {
     let dollarResult = dollarBeginningBalance;
     if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
-      console.log("icii");
+      console.log("dans le if");
+      console.log(dollarResult)
       let tmp = endingDollarRentalIncome - dollarExpensesEndingBalance;
       dollarResult = tmp;
     } else if (endingDollarRentalIncome > 0) {
-      dollarResult += parseFloat(endingDollarRentalIncome);
+      console.log("dans le else if 1");
+      console.log(dollarResult)
+      // dollarResult += parseFloat(endingDollarRentalIncome);
+      dollarResult = parseFloat(dollarResult) + parseFloat(endingDollarRentalIncome);
     } else if (dollarExpensesEndingBalance) {
-      dollarResult += parseFloat(dollarExpensesEndingBalance);
+      console.log("dans le else if 2");
+      console.log(dollarResult)
+      console.log(typeof dollarResult)
+      console.log("dollarExpensesEndingBalance")
+      console.log(dollarExpensesEndingBalance)
+      console.log(typeof dollarExpensesEndingBalance)
+
+      dollarResult = parseFloat(dollarResult) + parseFloat(dollarExpensesEndingBalance);
+      // dollarResult += parseFloat(dollarExpensesEndingBalance);
     }
     console.log("dollarResult");
     console.log(dollarResult);
@@ -255,9 +263,11 @@ function Home() {
       euroResult = tmp;
     }
     else if (endingEuroRentalIncome > 0) {
-      euroResult += parseFloat(endingEuroRentalIncome);
+      euroResult = parseFloat(euroResult) + parseFloat(endingEuroRentalIncome);
+      // euroResult += parseFloat(endingEuroRentalIncome);
     } else if (euroExpensesEndingBalance) {
-      euroResult += parseFloat(euroExpensesEndingBalance);
+      euroResult = parseFloat(euroResult) + parseFloat(euroExpensesEndingBalance);
+      // euroResult += parseFloat(euroExpensesEndingBalance);
     }
     setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
   }, [euroExpensesEndingBalance]);
@@ -274,7 +284,8 @@ function Home() {
         euroResult = euroEndingBalance;
       }
       if (endingEuroRentalIncome) euroResult = endingEuroRentalIncome - euroResult;
-      setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));    }
+      setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
+    }
   }, [euroBeginningBalance]);
 
   useEffect(() => {
@@ -313,7 +324,7 @@ function Home() {
         </center>
 
         <Form.Group className="mb-3">
-          <Form.Label htmlFor="inputPassword5">Solde initial EUR</Form.Label>
+          <Form.Label htmlFor="inputPassword5">EUR Beginning balance / Solde initial EUR</Form.Label>
           <Form.Control
             defaultValue={0}
             type="number"
@@ -327,7 +338,7 @@ function Home() {
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label htmlFor="inputPassword5">Solde initial USD</Form.Label>
+          <Form.Label htmlFor="inputPassword5">USD Beginning balance / Solde initial USD</Form.Label>
           <Form.Control
             type="number"
             defaultValue={0}
@@ -342,7 +353,10 @@ function Home() {
         </Form.Group>
 
         <Form.Group className="mb-5">
-          <Form.Label>Choisissez le fichier Recettes USD</Form.Label>
+          <Form.Label>Select the <strong>Income USD </strong> file / Choisissez le fichier <strong>Recettes USD </strong>
+            <br />
+            <strong>ATTENTION : CSV format</strong></Form.Label>
+
           <Form.Control
             type="file"
             placeholder="Enter email"
@@ -350,7 +364,9 @@ function Home() {
           />
         </Form.Group>
         <Form.Group className="mb-5">
-          <Form.Label>Choisissez le fichier Dépenses USD</Form.Label>
+          <Form.Label>Select the <strong>Expense USD </strong> file / Choisissez le fichier <strong>Dépenses USD </strong>
+          <br />
+            <strong>ATTENTION : CSV format</strong></Form.Label>
           <Form.Control
             type="file"
             placeholder="Enter email"
@@ -359,7 +375,9 @@ function Home() {
         </Form.Group>
 
         <Form.Group className="mb-5">
-          <Form.Label>Choisissez le fichier Dépenses EURO</Form.Label>
+          <Form.Label>Select the <strong>Expense EURO </strong>file / Choisissez le fichier <strong>Dépenses EURO</strong>
+          <br />
+            <strong>ATTENTION : CSV format</strong></Form.Label>
           <Form.Control
             type="file"
             placeholder="Enter email"
@@ -369,7 +387,7 @@ function Home() {
 
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
-            Cession devises EURO (optionnel)
+            Cession devises EURO (optional)
           </Form.Label>
           <Form.Control
             type="number"
@@ -386,7 +404,7 @@ function Home() {
 
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
-            Cession devises USD (optionnel)
+            Cession devises USD (optional)
           </Form.Label>
           <Form.Control
             type="number"
@@ -410,7 +428,7 @@ function Home() {
           }}
         >
           <Form.Label htmlFor="inputPassword5">
-            Devise achetée (optionnel)
+            Currency bought / Devise achetée (optional)
           </Form.Label>
           <Form.Check
             inline
@@ -464,19 +482,19 @@ function Home() {
               <tr>
                 <th>Date</th>
                 <th>Description</th>
-                <th>Recettes USD</th>
-                <th>Depenses USD</th>
-                <th>Solde USD</th>
-                <th>Recettes EURO</th>
-                <th>Depenses EURO</th>
-                <th>Solde EURO</th>
+                <th>Income USD / Recettes USD</th>
+                <th>Expense USD / Depenses USD</th>
+                <th>Balance USD / Solde USD</th>
+                <th>Income EURO / Recettes EURO</th>
+                <th>Expense EURO / Depenses EURO</th>
+                <th>Balance EURO / Solde EURO</th>
               </tr>
             </thead>
             <tbody>
               {/* Beginning Balance */}
               <tr>
                 <td></td>
-                <td>Solde initial</td>
+                <td>Beginning balance / Solde initial</td>
                 <td>-</td>
                 <td>-</td>
                 <td>
@@ -619,7 +637,7 @@ function Home() {
               <tr>
                 <td></td>
                 <td>
-                  <strong>Solde de cloture</strong>
+                  <strong>Ending balance / Solde de cloture</strong>
                 </td>
                 {(endingDollarRentalIncome) && (
                   <td>
@@ -650,7 +668,7 @@ function Home() {
                 {euroExpensesEndingBalance && checkedRadio == 2 && (
                   <>
                     <td>
-                      {endingEuroRentalIncome &&(<strong> {endingEuroRentalIncome} EUR</strong>)}
+                      {endingEuroRentalIncome && (<strong> {endingEuroRentalIncome} EUR</strong>)}
                       {!endingEuroRentalIncome && <></>}
                     </td>
                     <td><strong>{euroExpensesEndingBalance} EUR</strong></td>
