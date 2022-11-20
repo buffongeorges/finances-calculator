@@ -419,7 +419,7 @@ function Home() {
 
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
-            Cession devises EURO (optional)
+            Currency exchange / Cession devises EURO (optional)
           </Form.Label>
           <Form.Control
             type="number"
@@ -443,7 +443,7 @@ function Home() {
 
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
-            Cession devises USD (optional)
+            Currency Exchange / Cession devises USD (optional)
           </Form.Label>
           <Form.Control
             type="number"
@@ -584,7 +584,7 @@ function Home() {
                   <tr>
                     <td> </td>
                     <td>
-                      <strong>Cession de devises</strong>
+                      <strong>Currency Exchange / Cession de devises</strong>
                     </td>
                     {dollarCession && checkedRadio == 1 && (
                       <>
