@@ -648,7 +648,7 @@ function Home() {
                 <th>Description</th>
                 <th>Income USD / Recettes USD</th>
                 <th>Expense USD / Depenses USD</th>
-                <th>Balance USD / Solde USD</th>
+                <th style={{borderRight: 'solid'}}>Balance USD / Solde USD</th>
                 <th>Income EURO / Recettes EURO</th>
                 <th>Expense EURO / Depenses EURO</th>
                 <th>Balance EURO / Solde EURO</th>
@@ -663,7 +663,7 @@ function Home() {
                   <strong>USD {dollarBeginningBalance} </strong>
                 </td>
                 <td>-</td>
-                <td>-{/* <strong>USD {dollarBeginningBalance} </strong> */}</td>
+                <td style={{borderRight: 'solid'}}>-{/* <strong>USD {dollarBeginningBalance} </strong> */}</td>
                 <td>
                   <strong>{euroBeginningBalance} EUR</strong>
                 </td>
@@ -682,7 +682,7 @@ function Home() {
                 </td>
                 <td><strong>USD {fundsFromOwnerDollar}</strong> </td>
                 <td>-</td>
-                <td>-</td>
+                <td style={{borderRight: 'solid'}}>-</td>
                 <td><strong>{fundsFromOwnerEuro} EUR</strong></td>
                 <td>-</td>
                 <td>-</td>
@@ -704,7 +704,7 @@ function Home() {
                     <td>{value["Client Name"]}</td>
                     <td>USD {value.Amount}</td>
                     <td>-</td>
-                    <td>-</td>
+                    <td style={{borderRight: 'solid'}}>-</td>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
@@ -725,7 +725,7 @@ function Home() {
                       <td>
                         <strong>USD {dollarCession}</strong>
                       </td>
-                      <td> </td>
+                      <td style={{borderRight: 'solid'}}> </td>
                     </>
                   )}
                   {dollarCession && checkedRadio == 2 && (
@@ -739,7 +739,9 @@ function Home() {
                   )}
                   {!dollarCession && (
                     <>
-                      <td> </td> <td> </td> <td> </td>
+                      <td> </td> 
+                      <td> </td> 
+                      <td> </td>
                     </>
                   )}
                   {/* ----- */}
@@ -763,7 +765,9 @@ function Home() {
                   )}
                   {!euroCession && (
                     <>
-                      <td> </td> <td> </td> <td> </td>
+                      <td> </td> 
+                      <td> </td> 
+                      <td> </td>
                     </>
                   )}
                 </tr>
@@ -789,7 +793,7 @@ function Home() {
                           </td>
                           <td> </td>
                           <td> </td>
-                          <td> </td>
+                          <td style={{borderRight: 'solid'}}> </td>
                           <td> </td>
                           <td> </td>
                           <td> </td>
@@ -802,7 +806,7 @@ function Home() {
                         <td>{value.Merchant}</td>
                         <td>-</td>
                         <td>-</td>
-                        <td>-</td>
+                        <td style={{borderRight: 'solid'}}>-</td>
                         <td>-</td>
                         <td>{value.Amount} EUR</td>
                         <td>-</td>
@@ -814,7 +818,7 @@ function Home() {
                         <td>{value.Merchant}</td>
                         <td>-</td>
                         <td>USD {value.Amount}</td>
-                        <td>-</td>
+                        <td style={{borderRight: 'solid'}}>-</td>
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
@@ -840,7 +844,7 @@ function Home() {
                   </td>
                 )}
                 {!dollarExpensesEndingBalance && <td>-</td>}
-                <td>
+                <td style={{borderRight: 'solid'}}>
                   <strong>USD {dollarEndingBalance}</strong>
                 </td>
 
