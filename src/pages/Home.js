@@ -22,7 +22,7 @@ function Home() {
 
   const [dollarExpensesEndingBalance, setDollarExpensesEndingBalance] =
     useState(null);
-    useState(null);
+  useState(null);
   const [endingDollarRentalIncome, setDollarEndingRentalIncome] =
     useState(null);
   const [endingEuroRentalIncome, setEuroEndingRentalIncome] = useState(null);
@@ -154,7 +154,8 @@ function Home() {
     //dollar rental income
     console.log("on va ajouter des ici");
     console.log(dollarBeginningBalance);
-    rentalDollarIncomeResult += parseFloat(dollarBeginningBalance) + parseFloat(fundsFromOwnerDollar);
+    rentalDollarIncomeResult +=
+      parseFloat(dollarBeginningBalance) + parseFloat(fundsFromOwnerDollar);
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalDollarIncomeResult += parseFloat(val.Amount);
@@ -177,7 +178,8 @@ function Home() {
       });
     }
 
-    rentalEuroIncomeResult += parseFloat(euroBeginningBalance) + parseFloat(fundsFromOwnerEuro);
+    rentalEuroIncomeResult +=
+      parseFloat(euroBeginningBalance) + parseFloat(fundsFromOwnerEuro);
     if (euroCession && checkedRadio == 2) {
       euroResult += parseFloat(euroCession);
       // no rental income for euros ...
@@ -187,7 +189,9 @@ function Home() {
     } else if (euroCession && checkedRadio == 1) {
       rentalEuroIncomeResult += parseFloat(euroCession);
     }
-    setEuroEndingRentalIncome((Math.round(rentalEuroIncomeResult * 100) / 100).toFixed(2));
+    setEuroEndingRentalIncome(
+      (Math.round(rentalEuroIncomeResult * 100) / 100).toFixed(2)
+    );
 
     setEuroExpensesEndingBalance(
       (Math.round(euroResult * 100) / 100).toFixed(2)
@@ -336,7 +340,7 @@ function Home() {
   }, [endingDollarRentalIncome]);
 
   useEffect(() => {
-    console.log('on a qqch????????????????????');
+    console.log("on a qqch????????????????????");
     console.log("on va faire le calcul...");
     console.log(euroBeginningBalance);
     let euroResult = euroBeginningBalance;
@@ -346,16 +350,15 @@ function Home() {
         parseFloat(endingEuroRentalIncome) -
         parseFloat(euroExpensesEndingBalance);
     } else if (endingEuroRentalIncome > 0) {
-      euroResult =
-        parseFloat(euroResult) + parseFloat(endingEuroRentalIncome);
+      euroResult = parseFloat(euroResult) + parseFloat(endingEuroRentalIncome);
     } else if (euroExpensesEndingBalance) {
       euroResult =
         parseFloat(euroResult) + parseFloat(euroExpensesEndingBalance);
     }
-    console.log("euroResult")
-    console.log(euroResult)
+    console.log("euroResult");
+    console.log(euroResult);
     setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
-  }, [endingEuroRentalIncome])
+  }, [endingEuroRentalIncome]);
 
   return (
     <div className="App">
@@ -398,29 +401,6 @@ function Home() {
 
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
-            EUR Beginning balance / Solde initial EUR
-          </Form.Label>
-          <Form.Control
-            defaultValue={0}
-            type="number"
-            maxLength={10}
-            min="0"
-            id="inputPassword5"
-            aria-describedby="passwordHelpBlock"
-            onChange={(e) => {
-              setEuroBeginningBalance(e.target.value);
-              setShowTable(false);
-            }}
-            onKeyPress={(event) => {
-              if (!/[0-9-.]/.test(event.key)) {
-                event.preventDefault();
-                alert("You can only enter numbers !");
-              }
-            }}
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="inputPassword5">
             USD Beginning balance / Solde initial USD
           </Form.Label>
           <Form.Control
@@ -442,46 +422,51 @@ function Home() {
             }}
           />
         </Form.Group>
-
-        <Form.Group className="mb-5">
-          <Form.Label>
-            Select the <strong>Income USD (payments collected)</strong> file /
-            Choisissez le fichier <strong>Recettes USD </strong>
-            <br />
-            <strong>ATTENTION : CSV format</strong>
-          </Form.Label>
-
-          <Form.Control
-            type="file"
-            placeholder="Enter email"
-            onChange={rentalIncomeChangeHandler}
-          />
-        </Form.Group>
-        <Form.Group className="mb-5">
-          <Form.Label>
-            Select the <strong>Expense USD </strong> file / Choisissez le
-            fichier <strong>Dépenses USD </strong>
-            <br />
-            <strong>ATTENTION : CSV format</strong>
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="inputPassword5">
+            EUR Beginning balance / Solde initial EUR
           </Form.Label>
           <Form.Control
-            type="file"
-            placeholder="Enter email"
-            onChange={dollarChangeHandler}
+            defaultValue={0}
+            type="number"
+            maxLength={10}
+            min="0"
+            id="inputPassword5"
+            aria-describedby="passwordHelpBlock"
+            onChange={(e) => {
+              setEuroBeginningBalance(e.target.value);
+              setShowTable(false);
+            }}
+            onKeyPress={(event) => {
+              if (!/[0-9-.]/.test(event.key)) {
+                event.preventDefault();
+                alert("You can only enter numbers !");
+              }
+            }}
           />
         </Form.Group>
 
-        <Form.Group className="mb-5">
-          <Form.Label>
-            Select the <strong>Expense EURO </strong>file / Choisissez le
-            fichier <strong>Dépenses EURO</strong>
-            <br />
-            <strong>ATTENTION : CSV format</strong>
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="inputPassword5">
+            Funds / wire from owner USD (optional)
           </Form.Label>
           <Form.Control
-            type="file"
-            placeholder="Enter email"
-            onChange={euroChangeHandler}
+            type="number"
+            min="0"
+            defaultValue={0}
+            maxLength={10}
+            id="inputPassword5"
+            aria-describedby="passwordHelpBlock"
+            onChange={(e) => {
+              setFundsFromOwnerDollar(e.target.value);
+              setShowTable(false);
+            }}
+            onKeyPress={(event) => {
+              if (!/[0-9-.]/.test(event.key)) {
+                event.preventDefault();
+                alert("You can only enter numbers !");
+              }
+            }}
           />
         </Form.Group>
 
@@ -509,9 +494,24 @@ function Home() {
           />
         </Form.Group>
 
+        <Form.Group className="mb-5">
+          <Form.Label>
+            Select the <strong>Income USD (payments collected)</strong> file /
+            Choisissez le fichier <strong>Recettes USD </strong>
+            <br />
+            <strong>ATTENTION : CSV format</strong>
+          </Form.Label>
+
+          <Form.Control
+            type="file"
+            placeholder="Enter email"
+            onChange={rentalIncomeChangeHandler}
+          />
+        </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
-           Funds / wire from owner USD (optional)
+            Currency Exchange / Cession devises USD (optional)
           </Form.Label>
           <Form.Control
             type="number"
@@ -521,7 +521,7 @@ function Home() {
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
             onChange={(e) => {
-              setFundsFromOwnerDollar(e.target.value);
+              setDollarCession(e.target.value);
               setShowTable(false);
             }}
             onKeyPress={(event) => {
@@ -546,30 +546,6 @@ function Home() {
             aria-describedby="passwordHelpBlock"
             onChange={(e) => {
               setEuroCession(e.target.value);
-              setShowTable(false);
-            }}
-            onKeyPress={(event) => {
-              if (!/[0-9-.]/.test(event.key)) {
-                event.preventDefault();
-                alert("You can only enter numbers !");
-              }
-            }}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="inputPassword5">
-            Currency Exchange / Cession devises USD (optional)
-          </Form.Label>
-          <Form.Control
-            type="number"
-            min="0"
-            defaultValue={0}
-            maxLength={10}
-            id="inputPassword5"
-            aria-describedby="passwordHelpBlock"
-            onChange={(e) => {
-              setDollarCession(e.target.value);
               setShowTable(false);
             }}
             onKeyPress={(event) => {
@@ -610,6 +586,34 @@ function Home() {
           />
         </div>
 
+        <Form.Group className="mb-5">
+          <Form.Label>
+            Select the <strong>Expense USD </strong> file / Choisissez le
+            fichier <strong>Dépenses USD </strong>
+            <br />
+            <strong>ATTENTION : CSV format</strong>
+          </Form.Label>
+          <Form.Control
+            type="file"
+            placeholder="Enter email"
+            onChange={dollarChangeHandler}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-5">
+          <Form.Label>
+            Select the <strong>Expense EURO </strong>file / Choisissez le
+            fichier <strong>Dépenses EURO</strong>
+            <br />
+            <strong>ATTENTION : CSV format</strong>
+          </Form.Label>
+          <Form.Control
+            type="file"
+            placeholder="Enter email"
+            onChange={euroChangeHandler}
+          />
+        </Form.Group>
+
         <Button
           variant="primary"
           type="submit"
@@ -648,7 +652,9 @@ function Home() {
                 <th>Description</th>
                 <th>Income USD / Recettes USD</th>
                 <th>Expense USD / Depenses USD</th>
-                <th style={{borderRight: 'solid'}}>Balance USD / Solde USD</th>
+                <th style={{ borderRight: "solid" }}>
+                  Balance USD / Solde USD
+                </th>
                 <th>Income EURO / Recettes EURO</th>
                 <th>Expense EURO / Depenses EURO</th>
                 <th>Balance EURO / Solde EURO</th>
@@ -663,7 +669,9 @@ function Home() {
                   <strong>USD {dollarBeginningBalance} </strong>
                 </td>
                 <td>-</td>
-                <td style={{borderRight: 'solid'}}>-{/* <strong>USD {dollarBeginningBalance} </strong> */}</td>
+                <td style={{ borderRight: "solid" }}>
+                  -{/* <strong>USD {dollarBeginningBalance} </strong> */}
+                </td>
                 <td>
                   <strong>{euroBeginningBalance} EUR</strong>
                 </td>
@@ -680,10 +688,14 @@ function Home() {
                   {" "}
                   <strong>Funds / Wire from owner </strong>
                 </td>
-                <td><strong>USD {fundsFromOwnerDollar}</strong> </td>
+                <td>
+                  <strong>USD {fundsFromOwnerDollar}</strong>{" "}
+                </td>
                 <td>-</td>
-                <td style={{borderRight: 'solid'}}>-</td>
-                <td><strong>{fundsFromOwnerEuro} EUR</strong></td>
+                <td style={{ borderRight: "solid" }}>-</td>
+                <td>
+                  <strong>{fundsFromOwnerEuro} EUR</strong>
+                </td>
                 <td>-</td>
                 <td>-</td>
               </tr>
@@ -704,7 +716,7 @@ function Home() {
                     <td>{value["Client Name"]}</td>
                     <td>USD {value.Amount}</td>
                     <td>-</td>
-                    <td style={{borderRight: 'solid'}}>-</td>
+                    <td style={{ borderRight: "solid" }}>-</td>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
@@ -725,7 +737,7 @@ function Home() {
                       <td>
                         <strong>USD {dollarCession}</strong>
                       </td>
-                      <td style={{borderRight: 'solid'}}> </td>
+                      <td style={{ borderRight: "solid" }}> </td>
                     </>
                   )}
                   {dollarCession && checkedRadio == 2 && (
@@ -739,8 +751,8 @@ function Home() {
                   )}
                   {!dollarCession && (
                     <>
-                      <td> </td> 
-                      <td> </td> 
+                      <td> </td>
+                      <td> </td>
                       <td> </td>
                     </>
                   )}
@@ -765,8 +777,8 @@ function Home() {
                   )}
                   {!euroCession && (
                     <>
-                      <td> </td> 
-                      <td> </td> 
+                      <td> </td>
+                      <td> </td>
                       <td> </td>
                     </>
                   )}
@@ -793,7 +805,7 @@ function Home() {
                           </td>
                           <td> </td>
                           <td> </td>
-                          <td style={{borderRight: 'solid'}}> </td>
+                          <td style={{ borderRight: "solid" }}> </td>
                           <td> </td>
                           <td> </td>
                           <td> </td>
@@ -806,7 +818,7 @@ function Home() {
                         <td>{value.Merchant}</td>
                         <td>-</td>
                         <td>-</td>
-                        <td style={{borderRight: 'solid'}}>-</td>
+                        <td style={{ borderRight: "solid" }}>-</td>
                         <td>-</td>
                         <td>{value.Amount} EUR</td>
                         <td>-</td>
@@ -818,7 +830,7 @@ function Home() {
                         <td>{value.Merchant}</td>
                         <td>-</td>
                         <td>USD {value.Amount}</td>
-                        <td style={{borderRight: 'solid'}}>-</td>
+                        <td style={{ borderRight: "solid" }}>-</td>
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
@@ -844,7 +856,7 @@ function Home() {
                   </td>
                 )}
                 {!dollarExpensesEndingBalance && <td>-</td>}
-                <td style={{borderRight: 'solid'}}>
+                <td style={{ borderRight: "solid" }}>
                   <strong>USD {dollarEndingBalance}</strong>
                 </td>
 
