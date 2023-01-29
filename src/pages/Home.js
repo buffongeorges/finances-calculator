@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Form, Button, Table } from "react-bootstrap";
 import Papa from "papaparse";
 import ReactHTMLTableToExcel from "react-html-table-to-excel";
+import './Home.css';
 
 function Home() {
   const [date, setDate] = useState();
