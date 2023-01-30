@@ -2,11 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Form, Button, Table } from "react-bootstrap";
 import Papa from "papaparse";
 import ReactHTMLTableToExcel from "react-html-table-to-excel";
-import './Home.css';
+import "./Home.css";
 
 function Home() {
   const [date, setDate] = useState();
   const [today, setToday] = useState();
+
+  //client
+  const [clientName, setClientName] = useState("");
 
   //beginning balances
   const [euroBeginningBalance, setEuroBeginningBalance] = useState(0);
@@ -42,6 +45,10 @@ function Home() {
   // I wanted to delete the default button when the generate file button was clicked
   //which means that i needed to know when the default button "Download file" with id test-table-xls-button was injected in the DOM
   const [ref, setRef] = useState(null);
+
+  const styles = {
+    border: "1px solid black",
+  };
 
   const tableRef = useCallback((node) => {
     setRef(node);
@@ -401,6 +408,22 @@ function Home() {
         </Button>
 
         <Form.Group className="mb-3">
+          <Form.Label htmlFor="clientName">
+            Client name / Nom du client :
+          </Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter client name"
+            id="clientName"
+            aria-describedby="clientName"
+            onChange={(e) => {
+              setClientName(e.target.value);
+              setShowTable(false);
+            }}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             USD Beginning balance / Solde initial USD
           </Form.Label>
@@ -423,6 +446,7 @@ function Home() {
             }}
           />
         </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             EUR Beginning balance / Solde initial EUR
@@ -631,7 +655,7 @@ function Home() {
             id="test-table-xls-button"
             className="download-table-xls-button"
             table="dataTable"
-            filename={`property-ink-export-${date}`}
+            filename={`TPI-export-${clientName}`}
             sheet="tablexls"
             buttonText="Download File"
           />
@@ -648,12 +672,26 @@ function Home() {
             hover
           >
             <thead>
-              <tr>
+              <tr style={styles}>
+                <th>Home owner statement</th>
+              </tr>
+              {clientName && (
+                <tr style={styles}>
+                  <th>{clientName}</th>
+                </tr>
+              )}
+              {!clientName && (
+                <tr style={styles}>
+                  <th>{"No name for client"}</th>
+                </tr>
+              )}
+
+              <tr style={styles}>
                 <th>Date</th>
                 <th>Description</th>
                 <th>Income USD / Recettes USD</th>
-                <th>Expense USD / Depenses USD</th>
-                <th style={{ borderRight: "solid" }}>
+                <th className="testing">Expense USD / Depenses USD</th>
+                <th style={{ borderRight: "10px solid blue" }}>
                   Balance USD / Solde USD
                 </th>
                 <th>Income EURO / Recettes EURO</th>
@@ -663,14 +701,14 @@ function Home() {
             </thead>
             <tbody>
               {/* Beginning Balance */}
-              <tr>
+              <tr style={styles}>
                 <td></td>
                 <td>Beginning balance / Solde initial</td>
                 <td>
                   <strong>USD {dollarBeginningBalance} </strong>
                 </td>
                 <td>-</td>
-                <td style={{ borderRight: "solid" }}>
+                <td style={{ borderRight: "solid 10px blue" }}>
                   -{/* <strong>USD {dollarBeginningBalance} </strong> */}
                 </td>
                 <td>
@@ -683,7 +721,7 @@ function Home() {
               </tr>
 
               {/* Funds from owner */}
-              <tr>
+              <tr style={styles}>
                 <td></td>
                 <td>
                   {" "}
@@ -693,7 +731,7 @@ function Home() {
                   <strong>USD {fundsFromOwnerDollar}</strong>{" "}
                 </td>
                 <td>-</td>
-                <td style={{ borderRight: "solid" }}>-</td>
+                <td style={{ borderRight: "solid 10px blue" }}>-</td>
                 <td>
                   <strong>{fundsFromOwnerEuro} EUR</strong>
                 </td>
@@ -702,32 +740,23 @@ function Home() {
               </tr>
 
               {/* Rental Income */}
-              <tr>
+              <tr style={styles}>
                 <td></td>
                 <td>
                   {" "}
                   <strong>Rental Income </strong>
                 </td>
+                <td></td>
+                <td></td>
+                <td style={{ borderRight: "solid 10px blue" }}></td>
+                <td></td>
+                <td></td>
+                <td></td>
               </tr>
-
-              {rentalIncomeArray.map((value, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{value.Date}</td>
-                    <td>{value["Client Name"]}</td>
-                    <td>USD {value.Amount}</td>
-                    <td>-</td>
-                    <td style={{ borderRight: "solid" }}>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                  </tr>
-                );
-              })}
 
               {/* Cession de devises */}
               {(dollarCession || euroCession) && (
-                <tr>
+                <tr style={styles}>
                   <td> </td>
                   <td>
                     <strong>Currency Exchange / Cession de devises</strong>
@@ -738,7 +767,7 @@ function Home() {
                       <td>
                         <strong>USD {dollarCession}</strong>
                       </td>
-                      <td style={{ borderRight: "solid" }}> </td>
+                      <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
                   {dollarCession && checkedRadio == 2 && (
@@ -747,14 +776,14 @@ function Home() {
                         <strong>USD {dollarCession}</strong>
                       </td>
                       <td> </td>
-                      <td> </td>
+                      <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
                   {!dollarCession && (
                     <>
                       <td> </td>
                       <td> </td>
-                      <td> </td>
+                      <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
                   {/* ----- */}
@@ -764,7 +793,7 @@ function Home() {
                         <strong>{euroCession} EUR</strong>
                       </td>
                       <td> </td>
-                      <td> </td>
+                      <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
                   {euroCession && checkedRadio == 2 && (
@@ -785,12 +814,32 @@ function Home() {
                   )}
                 </tr>
               )}
+              {rentalIncomeArray.map((value, index) => {
+                return (
+                  <tr key={index} style={styles}>
+                    <td>{value.Date}</td>
+                    <td>{value["Client Name"]}</td>
+                    <td>USD {value.Amount}</td>
+                    <td>-</td>
+                    <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                );
+              })}
 
-              <tr>
+              <tr style={styles}>
                 <td>-</td>
                 <td>
                   <strong>{values[0]["Parent Category"]}</strong>
                 </td>
+                <td></td>
+                <td></td>
+                <td style={{ borderRight: "solid 10px blue" }}></td>
+                <td></td>
+                <td></td>
+                <td></td>
               </tr>
               {values.map((value, index) => {
                 return (
@@ -799,14 +848,14 @@ function Home() {
                       value["Parent Category"].localeCompare(
                         values[index - 1]["Parent Category"]
                       ) != 0 && (
-                        <tr>
+                        <tr style={styles}>
                           <td>-</td>
                           <td>
                             <strong>{value["Parent Category"]}</strong>
                           </td>
                           <td> </td>
                           <td> </td>
-                          <td style={{ borderRight: "solid" }}> </td>
+                          <td style={{ borderRight: "solid 10px blue" }}> </td>
                           <td> </td>
                           <td> </td>
                           <td> </td>
@@ -814,24 +863,24 @@ function Home() {
                       )}
 
                     {value.Currency == "EUR" && (
-                      <tr key={index}>
+                      <tr key={index} style={styles}>
                         <td>{value.Date}</td>
                         <td>{value.Merchant}</td>
                         <td>-</td>
                         <td>-</td>
-                        <td style={{ borderRight: "solid" }}>-</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
                         <td>-</td>
                         <td>{value.Amount} EUR</td>
                         <td>-</td>
                       </tr>
                     )}
                     {value.Currency == "USD" && (
-                      <tr key={index}>
+                      <tr key={index} style={styles}>
                         <td>{value.Date}</td>
                         <td>{value.Merchant}</td>
                         <td>-</td>
                         <td>USD {value.Amount}</td>
-                        <td style={{ borderRight: "solid" }}>-</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
@@ -840,7 +889,7 @@ function Home() {
                   </>
                 );
               })}
-              <tr>
+              <tr style={styles}>
                 <td></td>
                 <td>
                   <strong>Ending balance / Solde de cloture</strong>
@@ -857,7 +906,7 @@ function Home() {
                   </td>
                 )}
                 {!dollarExpensesEndingBalance && <td>-</td>}
-                <td style={{ borderRight: "solid" }}>
+                <td style={{ borderRight: "solid 10px blue" }}>
                   <strong>USD {dollarEndingBalance}</strong>
                 </td>
 
@@ -891,11 +940,23 @@ function Home() {
                   <strong> {euroEndingBalance} EUR</strong>
                 </td>
               </tr>
-              <tr>
+              <tr style={styles}>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style={{ borderRight: "solid 10px blue" }}></td>
+                <td></td>
                 <td>Account Managed by</td>
                 <td>ROGERS Line</td>
               </tr>
-              <tr>
+              <tr style={styles}>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style={{ borderRight: "solid 10px blue" }}></td>
+                <td></td>
                 <td>Report generated on</td>
                 <td>{today}</td>
               </tr>
