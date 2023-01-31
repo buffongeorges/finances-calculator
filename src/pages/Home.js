@@ -444,6 +444,7 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
+            onWheel={(e) => {e.target.blur()}}
           />
         </Form.Group>
 
@@ -468,6 +469,7 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
+            onWheel={(e) => {e.target.blur()}}
           />
         </Form.Group>
 
@@ -492,6 +494,7 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
+            onWheel={(e) => {e.target.blur()}}
           />
         </Form.Group>
 
@@ -516,6 +519,7 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
+            onWheel={(e) => {e.target.blur()}}
           />
         </Form.Group>
 
@@ -555,6 +559,7 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
+            onWheel={(e) => {e.target.blur()}}
           />
         </Form.Group>
 
@@ -579,6 +584,7 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
+            onWheel={(e) => {e.target.blur()}}
           />
         </Form.Group>
 
