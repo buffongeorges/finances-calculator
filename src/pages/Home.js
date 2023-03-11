@@ -9,7 +9,7 @@ function Home() {
   const [today, setToday] = useState();
 
   //refs
-  const UsdBeginningBalanceRef = useRef(null);
+  const usdBeginningBalanceRef = useRef(null);
   const eurBeginningBalanceRef = useRef(null);
   const fundsWireUsdRef = useRef(null);
   const fundsWireEurRef = useRef(null);
@@ -475,7 +475,7 @@ function Home() {
             type="number"
             min="0"
             defaultValue={0}
-            ref={UsdBeginningBalanceRef}
+            ref={usdBeginningBalanceRef}
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
@@ -494,7 +494,7 @@ function Home() {
             }}
             onClick={(e) => {
               if (e.target.value == 0)
-                UsdBeginningBalanceRef.current.value = "";
+                usdBeginningBalanceRef.current.value = "";
             }}
           />
         </Form.Group>
