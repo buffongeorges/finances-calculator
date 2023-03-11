@@ -8,6 +8,14 @@ function Home() {
   const [date, setDate] = useState();
   const [today, setToday] = useState();
 
+  //refs
+  const UsdBeginningBalanceRef = useRef(null);
+  const eurBeginningBalanceRef = useRef(null);
+  const fundsWireUsdRef = useRef(null);
+  const fundsWireEurRef = useRef(null);
+  const usdCurrencyExchangeRef = useRef(null);
+  const eurCurrencyExchangeRef = useRef(null);
+
   //client
   const [clientName, setClientName] = useState("");
 
@@ -36,7 +44,8 @@ function Home() {
   const [rentalIncomeArray, setRentalIncomeArray] = useState([]);
   const [dollarArray, setDollarArray] = useState();
 
-  const [checkedRadio, setCheckedRadio] = useState(1);
+  const [checkedRadioCurrency, setCheckedRadioCurrency] = useState(1);
+  const [checkedRadioReportPeriod, setCheckedRadioReportPeriod] = useState(1);
 
   const [euroCession, setEuroCession] = useState(null);
   const [dollarCession, setDollarCession] = useState(null);
@@ -128,6 +137,8 @@ function Home() {
       header: true,
       skipEmptyLines: true,
       complete: function (results) {
+        console.log('rentalIncomeArray USD.............');
+        console.log(results.data)
         setRentalIncomeArray(results.data);
       },
     });
@@ -152,27 +163,49 @@ function Home() {
       });
     }
 
-    if (dollarCession && checkedRadio == 1)
+    if (dollarCession && checkedRadioCurrency == 1) {
       dollarResult += parseFloat(dollarCession);
+    }
 
+    if (dollarBeginningBalance < 0) {
+      //solde initial négatif => dépense
+      dollarResult += parseFloat(Math.abs(dollarBeginningBalance));
+    }
+
+    // add commissions (TPI & Wholesaler) if present
+    rentalIncomeArray.forEach((rentalIncome) => {
+      console.log(rentalIncome)
+      if (rentalIncome["TPI Commission"]) {
+        console.log("TPI Commission exists!");
+        dollarResult += parseFloat(rentalIncome["TPI Commission"]);
+      }
+      if (rentalIncome["Wholesaler Commission"]) {
+        console.log("Wholesaler Commission exists!");
+        dollarResult += parseFloat(rentalIncome["Wholesaler Commission"]);
+      }
+    }) 
     setDollarExpensesEndingBalance(
       (Math.round(dollarResult * 100) / 100).toFixed(2)
     );
 
     //dollar rental income
-    console.log("on va ajouter des ici");
-    console.log(dollarBeginningBalance);
-    rentalDollarIncomeResult +=
-      parseFloat(dollarBeginningBalance) + parseFloat(fundsFromOwnerDollar);
+    if (dollarBeginningBalance >= 0) {
+      rentalDollarIncomeResult += parseFloat(dollarBeginningBalance);
+    }
+    rentalDollarIncomeResult += parseFloat(fundsFromOwnerDollar);
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalDollarIncomeResult += parseFloat(val.Amount);
       });
-      if (dollarCession && checkedRadio == 2)
+      if (dollarCession && checkedRadioCurrency == 2)
         rentalDollarIncomeResult += parseFloat(dollarCession);
     }
-
-    if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult) {
+    console.log(rentalDollarIncomeResult);
+    if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult >= 0) {
+      console.log("la valeur que je fixe est: ");
+      console.log(
+        (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
+      );
       setDollarEndingRentalIncome(
         (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
       );
@@ -186,15 +219,22 @@ function Home() {
       });
     }
 
-    rentalEuroIncomeResult +=
-      parseFloat(euroBeginningBalance) + parseFloat(fundsFromOwnerEuro);
-    if (euroCession && checkedRadio == 2) {
+    if (euroBeginningBalance < 0) {
+      //solde initial négatif => dépense
+      euroResult += parseFloat(Math.abs(euroBeginningBalance));
+    }
+
+    if (euroBeginningBalance >= 0) {
+      rentalEuroIncomeResult += parseFloat(euroBeginningBalance);
+    }
+    rentalEuroIncomeResult += parseFloat(fundsFromOwnerEuro);
+    if (euroCession && checkedRadioCurrency == 2) {
       euroResult += parseFloat(euroCession);
       // no rental income for euros ...
       // TO DO : ... except for funds/wire
       // rentalEuroIncomeResult += parseFloat(euroCession);
       // setEuroEndingRentalIncome(rentalEuroIncomeResult);
-    } else if (euroCession && checkedRadio == 1) {
+    } else if (euroCession && checkedRadioCurrency == 1) {
       rentalEuroIncomeResult += parseFloat(euroCession);
     }
     setEuroEndingRentalIncome(
@@ -244,8 +284,11 @@ function Home() {
   }
 
   useEffect(() => {
-    let dollarResult = dollarBeginningBalance;
-    if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
+    let dollarResult = dollarBeginningBalance >= 0 ? dollarBeginningBalance : 0;
+    console.log("positif???");
+    console.log(dollarResult > 0);
+    console.log("dollarResult", dollarResult);
+    if (dollarExpensesEndingBalance) {
       console.log("dans le if");
       console.log(dollarResult);
       let tmp = endingDollarRentalIncome - dollarExpensesEndingBalance;
@@ -270,7 +313,7 @@ function Home() {
   }, [dollarExpensesEndingBalance]);
 
   useEffect(() => {
-    let euroResult = euroBeginningBalance;
+    let euroResult = euroBeginningBalance >= 0 ? euroBeginningBalance : 0;
     if (endingEuroRentalIncome > 0 && euroExpensesEndingBalance) {
       console.log("dans le if");
       let tmp = endingEuroRentalIncome - euroExpensesEndingBalance;
@@ -329,10 +372,12 @@ function Home() {
   }, [dollarBeginningBalance]);
 
   useEffect(() => {
-    console.log("on va faire le calcul...");
+    console.log("on va faire le calcul de Solde USD ...");
     console.log(dollarBeginningBalance);
-    let dollarResult = dollarBeginningBalance;
-    if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
+    let dollarResult = dollarBeginningBalance >= 0 ? dollarBeginningBalance : 0;
+    console.log("dollarResult", dollarResult);
+
+    if (dollarExpensesEndingBalance) {
       dollarResult =
         // parseFloat(dollarResult) + // déjà ajouté auparavant...
         parseFloat(endingDollarRentalIncome) -
@@ -348,11 +393,10 @@ function Home() {
   }, [endingDollarRentalIncome]);
 
   useEffect(() => {
-    console.log("on a qqch????????????????????");
-    console.log("on va faire le calcul...");
+    console.log("on va faire le calcul de solde EUR...");
     console.log(euroBeginningBalance);
-    let euroResult = euroBeginningBalance;
-    if (endingEuroRentalIncome > 0 && euroExpensesEndingBalance) {
+    let euroResult = euroBeginningBalance >= 0 ? euroBeginningBalance : 0;
+    if (euroExpensesEndingBalance) {
       euroResult =
         // parseFloat(euroResult) + // déjà ajouté auparavant...
         parseFloat(endingEuroRentalIncome) -
@@ -431,6 +475,7 @@ function Home() {
             type="number"
             min="0"
             defaultValue={0}
+            ref={UsdBeginningBalanceRef}
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
@@ -444,7 +489,13 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0)
+                UsdBeginningBalanceRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -456,6 +507,7 @@ function Home() {
             defaultValue={0}
             type="number"
             maxLength={10}
+            ref={eurBeginningBalanceRef}
             min="0"
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
@@ -469,7 +521,13 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0)
+                eurBeginningBalanceRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -480,6 +538,7 @@ function Home() {
           <Form.Control
             type="number"
             min="0"
+            ref={fundsWireUsdRef}
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -494,7 +553,12 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0) fundsWireUsdRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -505,6 +569,7 @@ function Home() {
           <Form.Control
             type="number"
             min="0"
+            ref={fundsWireEurRef}
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -519,7 +584,12 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value) fundsWireEurRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -546,6 +616,7 @@ function Home() {
             type="number"
             min="0"
             defaultValue={0}
+            ref={usdCurrencyExchangeRef}
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
@@ -559,7 +630,13 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0)
+                usdCurrencyExchangeRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -570,6 +647,7 @@ function Home() {
           <Form.Control
             type="number"
             min="0"
+            ref={eurCurrencyExchangeRef}
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -584,7 +662,12 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value) eurCurrencyExchangeRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -592,11 +675,11 @@ function Home() {
           key={`inline-radio`}
           className="mb-3"
           onChange={(e) => {
-            setCheckedRadio(e.target.id[e.target.id.length - 1]);
+            setCheckedRadioCurrency(e.target.id[e.target.id.length - 1]);
             setShowTable(false);
           }}
         >
-          <Form.Label htmlFor="inputPassword5">
+          <Form.Label htmlFor="inputCurrencyBought">
             Currency bought / Devise achetée (optional)
           </Form.Label>
           <Form.Check
@@ -644,6 +727,33 @@ function Home() {
             onChange={euroChangeHandler}
           />
         </Form.Group>
+
+        <div
+          key={`inline-radio-report-period`}
+          className="mb-2"
+          onChange={(e) => {
+            setCheckedRadioReportPeriod(e.target.id[e.target.id.length - 1]);
+            setShowTable(false);
+          }}
+        >
+          <Form.Label htmlFor="inputReportPeriod">Report</Form.Label>
+          <Form.Check
+            inline
+            label="Monthly / Mensuel"
+            name="report-period"
+            type="radio"
+            id={`report-period-1`}
+            defaultChecked={true}
+            style={{ marginLeft: "1rem" }}
+          />
+          <Form.Check
+            inline
+            label="Annual / Annuel"
+            name="report-period"
+            type="radio"
+            id={`report-period-2`}
+          />
+        </div>
 
         <Button
           variant="primary"
@@ -696,7 +806,7 @@ function Home() {
                 <th>Date</th>
                 <th>Description</th>
                 <th>Income USD / Recettes USD</th>
-                <th className="testing">Expense USD / Depenses USD</th>
+                <th>Expense USD / Depenses USD</th>
                 <th style={{ borderRight: "10px solid blue" }}>
                   Balance USD / Solde USD
                 </th>
@@ -709,21 +819,37 @@ function Home() {
               {/* Beginning Balance */}
               <tr style={styles}>
                 <td></td>
-                <td>Beginning balance / Solde initial</td>
                 <td>
-                  <strong>USD {dollarBeginningBalance} </strong>
+                  <strong>Beginning balance / Solde initial</strong>
                 </td>
-                <td>-</td>
+                <td>
+                  {dollarBeginningBalance >= 0 && (
+                    <strong>$ {dollarBeginningBalance} </strong>
+                  )}
+                  {dollarBeginningBalance < 0 && <strong>$ 0</strong>}
+                </td>
+                <td>
+                  {dollarBeginningBalance < 0 && (
+                    <strong>$ {Math.abs(dollarBeginningBalance)}</strong>
+                  )}
+                  {dollarBeginningBalance >= 0 && <>-</>}
+                </td>
                 <td style={{ borderRight: "solid 10px blue" }}>
-                  -{/* <strong>USD {dollarBeginningBalance} </strong> */}
+                  -{/* <strong>$ {dollarBeginningBalance} </strong> */}
                 </td>
                 <td>
-                  <strong>{euroBeginningBalance} EUR</strong>
+                  {euroBeginningBalance >= 0 && (
+                    <strong>€ {euroBeginningBalance} </strong>
+                  )}
+                  {euroBeginningBalance < 0 && <strong>€ 0</strong>}
+                </td>
+                <td>
+                  {euroBeginningBalance < 0 && (
+                    <strong>€ {Math.abs(euroBeginningBalance)}</strong>
+                  )}
+                  {euroBeginningBalance >= 0 && <>-</>}
                 </td>
                 <td>-</td>
-                <td>
-                  -{/* <strong>{euroBeginningBalance} EURiiiiiiiiii</strong> */}
-                </td>
               </tr>
 
               {/* Funds from owner */}
@@ -734,12 +860,12 @@ function Home() {
                   <strong>Funds / Wire from owner </strong>
                 </td>
                 <td>
-                  <strong>USD {fundsFromOwnerDollar}</strong>{" "}
+                  <strong>$ {fundsFromOwnerDollar}</strong>{" "}
                 </td>
                 <td>-</td>
                 <td style={{ borderRight: "solid 10px blue" }}>-</td>
                 <td>
-                  <strong>{fundsFromOwnerEuro} EUR</strong>
+                  <strong>€ {fundsFromOwnerEuro}</strong>
                 </td>
                 <td>-</td>
                 <td>-</td>
@@ -750,7 +876,11 @@ function Home() {
                 <td></td>
                 <td>
                   {" "}
-                  <strong>Rental Income </strong>
+                  <strong>
+                    Rental Income
+                    {checkedRadioReportPeriod == 1 && <> (Month)</>}
+                    {checkedRadioReportPeriod == 2 && <> (Year)</>}
+                  </strong>
                 </td>
                 <td></td>
                 <td></td>
@@ -767,19 +897,19 @@ function Home() {
                   <td>
                     <strong>Currency Exchange / Cession de devises</strong>
                   </td>
-                  {dollarCession && checkedRadio == 1 && (
+                  {dollarCession && checkedRadioCurrency == 1 && (
                     <>
                       <td> </td>
                       <td>
-                        <strong>USD {dollarCession}</strong>
+                        <strong>$ {dollarCession}</strong>
                       </td>
                       <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
-                  {dollarCession && checkedRadio == 2 && (
+                  {dollarCession && checkedRadioCurrency == 2 && (
                     <>
                       <td>
-                        <strong>USD {dollarCession}</strong>
+                        <strong>$ {dollarCession}</strong>
                       </td>
                       <td> </td>
                       <td style={{ borderRight: "solid 10px blue" }}> </td>
@@ -793,20 +923,20 @@ function Home() {
                     </>
                   )}
                   {/* ----- */}
-                  {euroCession && checkedRadio == 1 && (
+                  {euroCession && checkedRadioCurrency == 1 && (
                     <>
                       <td>
-                        <strong>{euroCession} EUR</strong>
+                        <strong>€ {euroCession}</strong>
                       </td>
                       <td> </td>
                       <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
-                  {euroCession && checkedRadio == 2 && (
+                  {euroCession && checkedRadioCurrency == 2 && (
                     <>
                       <td> </td>
                       <td>
-                        <strong>{euroCession} EUR</strong>
+                        <strong>€ {euroCession}</strong>
                       </td>
                       <td> </td>
                     </>
@@ -822,16 +952,40 @@ function Home() {
               )}
               {rentalIncomeArray.map((value, index) => {
                 return (
-                  <tr key={index} style={styles}>
-                    <td>{value.Date}</td>
-                    <td>{value["Client Name"]}</td>
-                    <td>USD {value.Amount}</td>
-                    <td>-</td>
-                    <td style={{ borderRight: "solid 10px blue" }}>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                  </tr>
+                  <>
+                    <tr key={index} style={styles}>
+                      <td>{value.Date}</td>
+                      <td>{value["Client Name"]}</td>
+                      <td>$ {value.Amount}</td>
+                      <td>-</td>
+                      <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+                    {/* si le client a Wholesaler Commission attribué */}
+                    {value["Wholesaler Commission"] && (<tr style={styles}>
+                      <td>-</td>
+                      <td>Wholesaler Commission</td>
+                      <td>-</td>
+                      <td>$ {value["Wholesaler Commission"]}</td>
+                      <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>)}
+                    {/* si le client a TPI Commission attribué */}
+                    {value["TPI Commission"] && (<tr style={styles}>
+                      <td>-</td>
+                      <td>TPI Commission</td>
+                      <td>-</td>
+                      <td>$ {value["TPI Commission"]}</td>
+                      <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>)}
+                  </>
                 );
               })}
 
@@ -876,7 +1030,7 @@ function Home() {
                         <td>-</td>
                         <td style={{ borderRight: "solid 10px blue" }}>-</td>
                         <td>-</td>
-                        <td>{value.Amount} EUR</td>
+                        <td>€ {value.Amount}</td>
                         <td>-</td>
                       </tr>
                     )}
@@ -885,7 +1039,7 @@ function Home() {
                         <td>{value.Date}</td>
                         <td>{value.Merchant}</td>
                         <td>-</td>
-                        <td>USD {value.Amount}</td>
+                        <td>$ {value.Amount}</td>
                         <td style={{ borderRight: "solid 10px blue" }}>-</td>
                         <td>-</td>
                         <td>-</td>
@@ -902,48 +1056,48 @@ function Home() {
                 </td>
                 {endingDollarRentalIncome && (
                   <td>
-                    <strong>USD {endingDollarRentalIncome}</strong>
+                    <strong>$ {endingDollarRentalIncome}</strong>
                   </td>
                 )}
                 {!endingDollarRentalIncome && <td>-</td>}
                 {dollarExpensesEndingBalance && (
                   <td>
-                    <strong>USD {dollarExpensesEndingBalance}</strong>
+                    <strong>$ {dollarExpensesEndingBalance}</strong>
                   </td>
                 )}
                 {!dollarExpensesEndingBalance && <td>-</td>}
                 <td style={{ borderRight: "solid 10px blue" }}>
-                  <strong>USD {dollarEndingBalance}</strong>
+                  <strong>$ {dollarEndingBalance}</strong>
                 </td>
 
-                {euroExpensesEndingBalance && checkedRadio == 1 && (
+                {euroExpensesEndingBalance && checkedRadioCurrency == 1 && (
                   <>
                     <td>
-                      <strong> {endingEuroRentalIncome} EUR</strong>
+                      <strong>€ {endingEuroRentalIncome}</strong>
                     </td>
                     <td>
-                      <strong>{euroExpensesEndingBalance} EUR</strong>
+                      <strong>€ {euroExpensesEndingBalance}</strong>
                     </td>
                   </>
                 )}
                 {!euroExpensesEndingBalance && <td>-</td>}
 
-                {euroExpensesEndingBalance && checkedRadio == 2 && (
+                {euroExpensesEndingBalance && checkedRadioCurrency == 2 && (
                   <>
                     <td>
                       {endingEuroRentalIncome && (
-                        <strong> {endingEuroRentalIncome} EUR</strong>
+                        <strong>€ {endingEuroRentalIncome}</strong>
                       )}
                       {!endingEuroRentalIncome && <></>}
                     </td>
                     <td>
-                      <strong>{euroExpensesEndingBalance} EUR</strong>
+                      <strong>€ {euroExpensesEndingBalance}</strong>
                     </td>
                   </>
                 )}
                 {!euroExpensesEndingBalance && <td>-</td>}
                 <td>
-                  <strong> {euroEndingBalance} EUR</strong>
+                  <strong>€ {euroEndingBalance}</strong>
                 </td>
               </tr>
               <tr style={styles}>
@@ -954,7 +1108,7 @@ function Home() {
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
                 <td>Account Managed by</td>
-                <td>ROGERS Line</td>
+                <td>Line ROGERS</td>
               </tr>
               <tr style={styles}>
                 <td></td>
