@@ -1,0 +1,9 @@
+Date;Account Sub Type;Parent Category;Subcategory;Source;Merchant;Project;Client;Description;Tax 1 Amount;Tax 1 Type;Tax 2 Amount;Tax 2 Type;Amount;Currency
+28/02/2023;Operating Expense;Other Expenses;Wire Sent To Owner;Jessica Mingo;PAYMENT TO OWNER;;Marie-Claude HELLER;Reglement location JAN 2023;0.00;;0.00;;10695.00;USD
+28/02/2023;Operating Expense;Supplies;Supplies (general);Jessica Mingo;BARTEND INK;;Marie-Claude HELLER;1 Breakfast basket - client WINTHER;0.00;;0.00;;40.00;USD
+28/02/2023;;Commissions;;;WHOLESALER COMMISSION - OCONNOR;;;;;;;;1640;USD
+28/02/2023;;Commissions;;;TPI COMMISSION - OCONNOR;;;;;;;;820;USD
+28/02/2023;;Commissions;;;WHOLESALER COMMISSION - WINTHER;;;;;;;;1440;USD
+28/02/2023;;Commissions;;;TPI COMMISSION - WINTHER;;;;;;;;720;USD
+28/02/2023;;Commissions;;;WHOLESALER COMMISSION - LANGFORD;;;;;;;;1491;USD
+28/02/2023;;Commissions;;;TPI COMMISSION - LANGFORD;;;;;;;;745,5;USD
