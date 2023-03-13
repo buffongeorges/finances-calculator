@@ -245,6 +245,10 @@ function Home() {
       (Math.round(euroResult * 100) / 100).toFixed(2)
     );
     setShowTable(true);
+
+    console.log('wait while generating....');
+    console.log('values')
+    console.log(values)
   };
 
   const downloadExcelSheet = () => {
@@ -1035,7 +1039,7 @@ function Home() {
                 );
               })}
 
-              <tr style={styles}>
+              {values.length > 0 && (<tr style={styles}>
                 <td>-</td>
                 <td>
                   <strong>{values[0]["Parent Category"]}</strong>
@@ -1046,7 +1050,7 @@ function Home() {
                 <td></td>
                 <td></td>
                 <td></td>
-              </tr>
+              </tr>)}
               {values.map((value, index) => {
                 return (
                   <>
