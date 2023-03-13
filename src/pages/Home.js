@@ -644,7 +644,7 @@ function Home() {
             Select the <strong>Income USD (payments collected)</strong> file /
             Choisissez le fichier <strong>Recettes USD </strong>
             <br />
-            <strong>ATTENTION : CSV format</strong>
+            <strong style={{color: 'red'}}>ATTENTION : only CSV format accepted</strong>
           </Form.Label>
 
           <Form.Control
@@ -751,7 +751,7 @@ function Home() {
             Select the <strong>Expense USD </strong> file / Choisissez le
             fichier <strong>Dépenses USD </strong>
             <br />
-            <strong>ATTENTION : CSV format</strong>
+            <strong style={{color: 'red'}}>ATTENTION : only CSV format accepted</strong>
           </Form.Label>
           <Form.Control
             type="file"
@@ -765,7 +765,7 @@ function Home() {
             Select the <strong>Expense EURO </strong>file / Choisissez le
             fichier <strong>Dépenses EURO</strong>
             <br />
-            <strong>ATTENTION : CSV format</strong>
+            <strong style={{color: 'red'}}>ATTENTION : only CSV format accepted</strong>
           </Form.Label>
           <Form.Control
             type="file"
