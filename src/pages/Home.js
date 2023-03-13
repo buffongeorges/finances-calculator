@@ -794,7 +794,7 @@ function Home() {
           />
           <Form.Check
             inline
-            label="Annual / Annuel"
+            label="Annually / Annuel"
             name="report-period"
             type="radio"
             id={`report-period-2`}
