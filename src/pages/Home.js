@@ -918,7 +918,9 @@ function Home() {
                     <strong>
                       <div>
                         <span style={{ float: "left", marginLeft: 0 }}>$</span>
-                        <span>{parseAmount(Math.abs(dollarBeginningBalance))}</span>
+                        <span>
+                          {parseAmount(Math.abs(dollarBeginningBalance))}
+                        </span>
                       </div>
                     </strong>
                   )}
@@ -950,7 +952,9 @@ function Home() {
                     <strong>
                       <div>
                         <span style={{ float: "left", marginLeft: 0 }}>€</span>
-                        <span>{parseAmount(Math.abs(euroBeginningBalance))}</span>
+                        <span>
+                          {parseAmount(Math.abs(euroBeginningBalance))}
+                        </span>
                       </div>
                     </strong>
                   )}
@@ -987,31 +991,11 @@ function Home() {
                 <td>-</td>
                 <td>-</td>
               </tr>
-
-              {/* Rental Income */}
-              <tr style={styles}>
-                <td></td>
-                <td style={{ textAlign: "left" }}>
-                  {" "}
-                  <strong>
-                    Rental Income
-                    {checkedRadioReportPeriod == 1 && <> (Month)</>}
-                    {checkedRadioReportPeriod == 2 && <> (Year)</>}
-                  </strong>
-                </td>
-                <td></td>
-                <td></td>
-                <td style={{ borderRight: "solid 10px blue" }}></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-
               {/* Cession de devises */}
               {(dollarCession || euroCession) && (
                 <tr style={styles}>
                   <td> </td>
-                  <td>
+                  <td style={{ textAlign: "left" }}>
                     <strong>Currency Exchange / Cession de devises</strong>
                   </td>
                   {dollarCession && checkedRadioCurrency == 1 && (
@@ -1095,6 +1079,25 @@ function Home() {
                   )}
                 </tr>
               )}
+              {/* Rental Income */}
+              <tr style={styles}>
+                <td></td>
+                <td style={{ textAlign: "left" }}>
+                  {" "}
+                  <strong>
+                    Rental Income
+                    {checkedRadioReportPeriod == 1 && <> (Month)</>}
+                    {checkedRadioReportPeriod == 2 && <> (Year)</>}
+                  </strong>
+                </td>
+                <td></td>
+                <td></td>
+                <td style={{ borderRight: "solid 10px blue" }}></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+
               {rentalIncomeArray.map((value, index) => {
                 return (
                   <>
