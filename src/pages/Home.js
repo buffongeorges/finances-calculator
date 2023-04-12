@@ -8,6 +8,14 @@ function Home() {
   const [date, setDate] = useState();
   const [today, setToday] = useState();
 
+  //refs
+  const usdBeginningBalanceRef = useRef(null);
+  const eurBeginningBalanceRef = useRef(null);
+  const fundsWireUsdRef = useRef(null);
+  const fundsWireEurRef = useRef(null);
+  const usdCurrencyExchangeRef = useRef(null);
+  const eurCurrencyExchangeRef = useRef(null);
+
   //client
   const [clientName, setClientName] = useState("");
 
@@ -36,7 +44,8 @@ function Home() {
   const [rentalIncomeArray, setRentalIncomeArray] = useState([]);
   const [dollarArray, setDollarArray] = useState();
 
-  const [checkedRadio, setCheckedRadio] = useState(1);
+  const [checkedRadioCurrency, setCheckedRadioCurrency] = useState(1);
+  const [checkedRadioReportPeriod, setCheckedRadioReportPeriod] = useState(1);
 
   const [euroCession, setEuroCession] = useState(null);
   const [dollarCession, setDollarCession] = useState(null);
@@ -48,6 +57,7 @@ function Home() {
 
   const styles = {
     border: "1px solid black",
+    textAlign: "left",
   };
 
   const tableRef = useCallback((node) => {
@@ -128,6 +138,8 @@ function Home() {
       header: true,
       skipEmptyLines: true,
       complete: function (results) {
+        console.log("rentalIncomeArray USD.............");
+        console.log(results.data);
         setRentalIncomeArray(results.data);
       },
     });
@@ -139,7 +151,7 @@ function Home() {
     var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
     var yyyy = today.getFullYear();
 
-    today = mm + "-" + dd + "-" + yyyy;
+    today = mm + "/" + dd + "/" + yyyy;
     setDate(today);
     let dollarResult = parseFloat(0);
     let euroResult = parseFloat(0);
@@ -148,31 +160,60 @@ function Home() {
 
     if (dollarArray) {
       dollarArray.forEach((val) => {
-        dollarResult += parseFloat(val.Amount);
+        const parsedValue = Number(val.Amount.replace(",", "."));
+        dollarResult += parseFloat(parsedValue);
       });
     }
 
-    if (dollarCession && checkedRadio == 1)
+    if (dollarCession && checkedRadioCurrency == 1) {
       dollarResult += parseFloat(dollarCession);
+    }
 
+    if (dollarBeginningBalance < 0) {
+      //solde initial négatif => dépense
+      dollarResult += parseFloat(Math.abs(dollarBeginningBalance));
+    }
+
+    // add commissions (TPI & Wholesaler) if present
+    rentalIncomeArray.forEach((rentalIncome) => {
+      console.log(rentalIncome);
+      if (rentalIncome["TPI Commission"]) {
+        console.log("TPI Commission exists!");
+        const parsedTpiCommission = Number(
+          rentalIncome["TPI Commission"].replace(",", ".")
+        );
+        dollarResult += parseFloat(parsedTpiCommission);
+      }
+      if (rentalIncome["Wholesaler Commission"]) {
+        console.log("Wholesaler Commission exists!");
+        const parsedWholesalerCommission = Number(
+          rentalIncome["Wholesaler Commission"].replace(",", ".")
+        );
+        dollarResult += parseFloat(parsedWholesalerCommission);
+      }
+    });
     setDollarExpensesEndingBalance(
       (Math.round(dollarResult * 100) / 100).toFixed(2)
     );
 
     //dollar rental income
-    console.log("on va ajouter des ici");
-    console.log(dollarBeginningBalance);
-    rentalDollarIncomeResult +=
-      parseFloat(dollarBeginningBalance) + parseFloat(fundsFromOwnerDollar);
+    if (dollarBeginningBalance >= 0) {
+      rentalDollarIncomeResult += parseFloat(dollarBeginningBalance);
+    }
+    rentalDollarIncomeResult += parseFloat(fundsFromOwnerDollar);
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalDollarIncomeResult += parseFloat(val.Amount);
       });
-      if (dollarCession && checkedRadio == 2)
+      if (dollarCession && checkedRadioCurrency == 2)
         rentalDollarIncomeResult += parseFloat(dollarCession);
     }
-
-    if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult) {
+    console.log(rentalDollarIncomeResult);
+    if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult >= 0) {
+      console.log("la valeur que je fixe est: ");
+      console.log(
+        (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
+      );
       setDollarEndingRentalIncome(
         (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
       );
@@ -186,15 +227,22 @@ function Home() {
       });
     }
 
-    rentalEuroIncomeResult +=
-      parseFloat(euroBeginningBalance) + parseFloat(fundsFromOwnerEuro);
-    if (euroCession && checkedRadio == 2) {
+    if (euroBeginningBalance < 0) {
+      //solde initial négatif => dépense
+      euroResult += parseFloat(Math.abs(euroBeginningBalance));
+    }
+
+    if (euroBeginningBalance >= 0) {
+      rentalEuroIncomeResult += parseFloat(euroBeginningBalance);
+    }
+    rentalEuroIncomeResult += parseFloat(fundsFromOwnerEuro);
+    if (euroCession && checkedRadioCurrency == 2) {
       euroResult += parseFloat(euroCession);
       // no rental income for euros ...
       // TO DO : ... except for funds/wire
       // rentalEuroIncomeResult += parseFloat(euroCession);
       // setEuroEndingRentalIncome(rentalEuroIncomeResult);
-    } else if (euroCession && checkedRadio == 1) {
+    } else if (euroCession && checkedRadioCurrency == 1) {
       rentalEuroIncomeResult += parseFloat(euroCession);
     }
     setEuroEndingRentalIncome(
@@ -205,6 +253,10 @@ function Home() {
       (Math.round(euroResult * 100) / 100).toFixed(2)
     );
     setShowTable(true);
+
+    console.log("wait while generating....");
+    console.log("values");
+    console.log(values);
   };
 
   const downloadExcelSheet = () => {
@@ -218,7 +270,7 @@ function Home() {
     var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
     var yyyy = today.getFullYear();
 
-    today = mm + "/" + dd + "/" + yyyy;
+    today = dd + "/" + mm + "/" + yyyy;
 
     setToday(today);
   }, []);
@@ -244,8 +296,11 @@ function Home() {
   }
 
   useEffect(() => {
-    let dollarResult = dollarBeginningBalance;
-    if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
+    let dollarResult = dollarBeginningBalance >= 0 ? dollarBeginningBalance : 0;
+    console.log("positif???");
+    console.log(dollarResult > 0);
+    console.log("dollarResult", dollarResult);
+    if (dollarExpensesEndingBalance) {
       console.log("dans le if");
       console.log(dollarResult);
       let tmp = endingDollarRentalIncome - dollarExpensesEndingBalance;
@@ -270,7 +325,7 @@ function Home() {
   }, [dollarExpensesEndingBalance]);
 
   useEffect(() => {
-    let euroResult = euroBeginningBalance;
+    let euroResult = euroBeginningBalance >= 0 ? euroBeginningBalance : 0;
     if (endingEuroRentalIncome > 0 && euroExpensesEndingBalance) {
       console.log("dans le if");
       let tmp = endingEuroRentalIncome - euroExpensesEndingBalance;
@@ -329,10 +384,12 @@ function Home() {
   }, [dollarBeginningBalance]);
 
   useEffect(() => {
-    console.log("on va faire le calcul...");
+    console.log("on va faire le calcul de Solde USD ...");
     console.log(dollarBeginningBalance);
-    let dollarResult = dollarBeginningBalance;
-    if (endingDollarRentalIncome > 0 && dollarExpensesEndingBalance) {
+    let dollarResult = dollarBeginningBalance >= 0 ? dollarBeginningBalance : 0;
+    console.log("dollarResult", dollarResult);
+
+    if (dollarExpensesEndingBalance) {
       dollarResult =
         // parseFloat(dollarResult) + // déjà ajouté auparavant...
         parseFloat(endingDollarRentalIncome) -
@@ -348,11 +405,10 @@ function Home() {
   }, [endingDollarRentalIncome]);
 
   useEffect(() => {
-    console.log("on a qqch????????????????????");
-    console.log("on va faire le calcul...");
+    console.log("on va faire le calcul de solde EUR...");
     console.log(euroBeginningBalance);
-    let euroResult = euroBeginningBalance;
-    if (endingEuroRentalIncome > 0 && euroExpensesEndingBalance) {
+    let euroResult = euroBeginningBalance >= 0 ? euroBeginningBalance : 0;
+    if (euroExpensesEndingBalance) {
       euroResult =
         // parseFloat(euroResult) + // déjà ajouté auparavant...
         parseFloat(endingEuroRentalIncome) -
@@ -367,6 +423,61 @@ function Home() {
     console.log(euroResult);
     setEuroEndingBalance((Math.round(euroResult * 100) / 100).toFixed(2));
   }, [endingEuroRentalIncome]);
+
+  // parse dates to have them all in the following format : mm/dd/yyyy
+  // ATTENTION : dateString have to be like : dd/mm/yyyy or yyyy-mm-dd
+  //for good conversion
+  // while be used only for dates generated by the program (today)
+  const parseDate = (dateString) => {
+    let year, month, day;
+
+    if (dateString.includes("/")) {
+      // Format JJ/MM/AAAA
+      const parts = dateString.split("/");
+      year = parseInt(parts[2], 10);
+      month = parseInt(parts[1], 10);
+      day = parseInt(parts[0], 10);
+    } else if (dateString.includes("-")) {
+      // Format AAAA-MM-JJ
+      const parts = dateString.split("-");
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10);
+      day = parseInt(parts[2], 10);
+    } else {
+      // Format non reconnu
+      throw new Error("Invalid date format");
+    }
+
+    const formattedDate = `${year}-${month.toString().padStart(2, "0")}-${day
+      .toString()
+      .padStart(2, "0")}`;
+    return new Date(formattedDate).toLocaleDateString("en-US", {
+      timeZone: "UTC",
+    });
+  };
+
+  //this function will be used to convert dates from excel sheets
+  //be careful with it, for now just for dates like yyyy-mm-dd
+  const parseDateArray = (dateString) => {
+    if (/^\d{4}/.test(dateString)) {
+      // Vérifie si la chaîne de caractères commence par une année (4 chiffres)
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${month}/${day}/${year}`;
+    } else {
+      return dateString;
+    }
+  };
+
+  const parseAmount = (amount) => {
+    if (amount) {
+      const parsedValue = Number(amount.replace(",", "."));
+      return Number(parsedValue).toFixed(2);
+    }
+    return Number(amount).toFixed(2);
+  };
 
   return (
     <div className="App">
@@ -431,6 +542,7 @@ function Home() {
             type="number"
             min="0"
             defaultValue={0}
+            ref={usdBeginningBalanceRef}
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
@@ -444,7 +556,13 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0)
+                usdBeginningBalanceRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -456,6 +574,7 @@ function Home() {
             defaultValue={0}
             type="number"
             maxLength={10}
+            ref={eurBeginningBalanceRef}
             min="0"
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
@@ -469,7 +588,13 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0)
+                eurBeginningBalanceRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -480,6 +605,7 @@ function Home() {
           <Form.Control
             type="number"
             min="0"
+            ref={fundsWireUsdRef}
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -494,7 +620,12 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0) fundsWireUsdRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -505,6 +636,7 @@ function Home() {
           <Form.Control
             type="number"
             min="0"
+            ref={fundsWireEurRef}
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -519,7 +651,12 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value) fundsWireEurRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -528,7 +665,9 @@ function Home() {
             Select the <strong>Income USD (payments collected)</strong> file /
             Choisissez le fichier <strong>Recettes USD </strong>
             <br />
-            <strong>ATTENTION : CSV format</strong>
+            <strong style={{ color: "red" }}>
+              ATTENTION : only CSV format accepted
+            </strong>
           </Form.Label>
 
           <Form.Control
@@ -546,6 +685,7 @@ function Home() {
             type="number"
             min="0"
             defaultValue={0}
+            ref={usdCurrencyExchangeRef}
             maxLength={10}
             id="inputPassword5"
             aria-describedby="passwordHelpBlock"
@@ -559,7 +699,13 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value == 0)
+                usdCurrencyExchangeRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -570,6 +716,7 @@ function Home() {
           <Form.Control
             type="number"
             min="0"
+            ref={eurCurrencyExchangeRef}
             defaultValue={0}
             maxLength={10}
             id="inputPassword5"
@@ -584,7 +731,12 @@ function Home() {
                 alert("You can only enter numbers !");
               }
             }}
-            onWheel={(e) => {e.target.blur()}}
+            onWheel={(e) => {
+              e.target.blur();
+            }}
+            onClick={(e) => {
+              if (e.target.value) eurCurrencyExchangeRef.current.value = "";
+            }}
           />
         </Form.Group>
 
@@ -592,11 +744,11 @@ function Home() {
           key={`inline-radio`}
           className="mb-3"
           onChange={(e) => {
-            setCheckedRadio(e.target.id[e.target.id.length - 1]);
+            setCheckedRadioCurrency(e.target.id[e.target.id.length - 1]);
             setShowTable(false);
           }}
         >
-          <Form.Label htmlFor="inputPassword5">
+          <Form.Label htmlFor="inputCurrencyBought">
             Currency bought / Devise achetée (optional)
           </Form.Label>
           <Form.Check
@@ -622,7 +774,9 @@ function Home() {
             Select the <strong>Expense USD </strong> file / Choisissez le
             fichier <strong>Dépenses USD </strong>
             <br />
-            <strong>ATTENTION : CSV format</strong>
+            <strong style={{ color: "red" }}>
+              ATTENTION : only CSV format accepted
+            </strong>
           </Form.Label>
           <Form.Control
             type="file"
@@ -636,7 +790,9 @@ function Home() {
             Select the <strong>Expense EURO </strong>file / Choisissez le
             fichier <strong>Dépenses EURO</strong>
             <br />
-            <strong>ATTENTION : CSV format</strong>
+            <strong style={{ color: "red" }}>
+              ATTENTION : only CSV format accepted
+            </strong>
           </Form.Label>
           <Form.Control
             type="file"
@@ -644,6 +800,33 @@ function Home() {
             onChange={euroChangeHandler}
           />
         </Form.Group>
+
+        <div
+          key={`inline-radio-report-period`}
+          className="mb-2"
+          onChange={(e) => {
+            setCheckedRadioReportPeriod(e.target.id[e.target.id.length - 1]);
+            setShowTable(false);
+          }}
+        >
+          <Form.Label htmlFor="inputReportPeriod">Report</Form.Label>
+          <Form.Check
+            inline
+            label="Monthly / Mensuel"
+            name="report-period"
+            type="radio"
+            id={`report-period-1`}
+            defaultChecked={true}
+            style={{ marginLeft: "1rem" }}
+          />
+          <Form.Check
+            inline
+            label="Annually / Annuel"
+            name="report-period"
+            type="radio"
+            id={`report-period-2`}
+          />
+        </div>
 
         <Button
           variant="primary"
@@ -696,7 +879,7 @@ function Home() {
                 <th>Date</th>
                 <th>Description</th>
                 <th>Income USD / Recettes USD</th>
-                <th className="testing">Expense USD / Depenses USD</th>
+                <th>Expense USD / Depenses USD</th>
                 <th style={{ borderRight: "10px solid blue" }}>
                   Balance USD / Solde USD
                 </th>
@@ -709,77 +892,139 @@ function Home() {
               {/* Beginning Balance */}
               <tr style={styles}>
                 <td></td>
-                <td>Beginning balance / Solde initial</td>
-                <td>
-                  <strong>USD {dollarBeginningBalance} </strong>
+                <td style={{ textAlign: "left" }}>
+                  <strong>Beginning balance / Solde initial</strong>
                 </td>
-                <td>-</td>
+                <td>
+                  {dollarBeginningBalance >= 0 && (
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
+                        <span>{parseAmount(dollarBeginningBalance)}</span>
+                      </div>
+                    </strong>
+                  )}
+                  {dollarBeginningBalance < 0 && (
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
+                        <span>0.00</span>
+                      </div>
+                    </strong>
+                  )}
+                </td>
+                <td>
+                  {dollarBeginningBalance < 0 && (
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
+                        <span>
+                          {parseAmount(Math.abs(dollarBeginningBalance))}
+                        </span>
+                      </div>
+                    </strong>
+                  )}
+                  {dollarBeginningBalance >= 0 && <>-</>}
+                </td>
                 <td style={{ borderRight: "solid 10px blue" }}>
-                  -{/* <strong>USD {dollarBeginningBalance} </strong> */}
+                  -{/* <strong>$ {dollarBeginningBalance} </strong> */}
                 </td>
                 <td>
-                  <strong>{euroBeginningBalance} EUR</strong>
+                  {euroBeginningBalance >= 0 && (
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>€</span>
+                        <span>{parseAmount(euroBeginningBalance)}</span>
+                      </div>
+                    </strong>
+                  )}
+                  {euroBeginningBalance < 0 && (
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>€</span>
+                        <span>0.00</span>
+                      </div>
+                    </strong>
+                  )}
+                </td>
+                <td>
+                  {euroBeginningBalance < 0 && (
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>€</span>
+                        <span>
+                          {parseAmount(Math.abs(euroBeginningBalance))}
+                        </span>
+                      </div>
+                    </strong>
+                  )}
+                  {euroBeginningBalance >= 0 && <>-</>}
                 </td>
                 <td>-</td>
-                <td>
-                  -{/* <strong>{euroBeginningBalance} EURiiiiiiiiii</strong> */}
-                </td>
               </tr>
 
               {/* Funds from owner */}
               <tr style={styles}>
                 <td></td>
-                <td>
+                <td style={{ textAlign: "left" }}>
                   {" "}
                   <strong>Funds / Wire from owner </strong>
                 </td>
                 <td>
-                  <strong>USD {fundsFromOwnerDollar}</strong>{" "}
+                  <strong>
+                    <div>
+                      <span style={{ float: "left", marginLeft: 0 }}>$</span>
+                      <span>{parseAmount(fundsFromOwnerDollar)}</span>
+                    </div>
+                  </strong>{" "}
                 </td>
                 <td>-</td>
                 <td style={{ borderRight: "solid 10px blue" }}>-</td>
                 <td>
-                  <strong>{fundsFromOwnerEuro} EUR</strong>
+                  <strong>
+                    <div>
+                      <span style={{ float: "left", marginLeft: 0 }}>€</span>
+                      <span>{parseAmount(fundsFromOwnerEuro)}</span>
+                    </div>
+                  </strong>
                 </td>
                 <td>-</td>
                 <td>-</td>
               </tr>
-
-              {/* Rental Income */}
-              <tr style={styles}>
-                <td></td>
-                <td>
-                  {" "}
-                  <strong>Rental Income </strong>
-                </td>
-                <td></td>
-                <td></td>
-                <td style={{ borderRight: "solid 10px blue" }}></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-
               {/* Cession de devises */}
               {(dollarCession || euroCession) && (
                 <tr style={styles}>
                   <td> </td>
-                  <td>
+                  <td style={{ textAlign: "left" }}>
                     <strong>Currency Exchange / Cession de devises</strong>
                   </td>
-                  {dollarCession && checkedRadio == 1 && (
+                  {dollarCession && checkedRadioCurrency == 1 && (
                     <>
                       <td> </td>
                       <td>
-                        <strong>USD {dollarCession}</strong>
+                        <strong>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              $
+                            </span>
+                            <span>{parseAmount(dollarCession)}</span>
+                          </div>
+                        </strong>
                       </td>
                       <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
-                  {dollarCession && checkedRadio == 2 && (
+                  {dollarCession && checkedRadioCurrency == 2 && (
                     <>
                       <td>
-                        <strong>USD {dollarCession}</strong>
+                        <strong>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              $
+                            </span>
+                            <span>{parseAmount(dollarCession)}</span>
+                          </div>
+                        </strong>
                       </td>
                       <td> </td>
                       <td style={{ borderRight: "solid 10px blue" }}> </td>
@@ -793,20 +1038,34 @@ function Home() {
                     </>
                   )}
                   {/* ----- */}
-                  {euroCession && checkedRadio == 1 && (
+                  {euroCession && checkedRadioCurrency == 1 && (
                     <>
                       <td>
-                        <strong>{euroCession} EUR</strong>
+                        <strong>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              €
+                            </span>
+                            <span>{parseAmount(euroCession)}</span>
+                          </div>
+                        </strong>
                       </td>
                       <td> </td>
                       <td style={{ borderRight: "solid 10px blue" }}> </td>
                     </>
                   )}
-                  {euroCession && checkedRadio == 2 && (
+                  {euroCession && checkedRadioCurrency == 2 && (
                     <>
                       <td> </td>
                       <td>
-                        <strong>{euroCession} EUR</strong>
+                        <strong>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              €
+                            </span>
+                            <span>{parseAmount(euroCession)}</span>
+                          </div>
+                        </strong>
                       </td>
                       <td> </td>
                     </>
@@ -820,25 +1079,16 @@ function Home() {
                   )}
                 </tr>
               )}
-              {rentalIncomeArray.map((value, index) => {
-                return (
-                  <tr key={index} style={styles}>
-                    <td>{value.Date}</td>
-                    <td>{value["Client Name"]}</td>
-                    <td>USD {value.Amount}</td>
-                    <td>-</td>
-                    <td style={{ borderRight: "solid 10px blue" }}>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                  </tr>
-                );
-              })}
-
+              {/* Rental Income */}
               <tr style={styles}>
-                <td>-</td>
-                <td>
-                  <strong>{values[0]["Parent Category"]}</strong>
+                <td></td>
+                <td style={{ textAlign: "left" }}>
+                  {" "}
+                  <strong>
+                    Rental Income
+                    {checkedRadioReportPeriod == 1 && <> (Month)</>}
+                    {checkedRadioReportPeriod == 2 && <> (Year)</>}
+                  </strong>
                 </td>
                 <td></td>
                 <td></td>
@@ -847,6 +1097,93 @@ function Home() {
                 <td></td>
                 <td></td>
               </tr>
+
+              {rentalIncomeArray.map((value, index) => {
+                return (
+                  <>
+                    <tr key={index} style={styles}>
+                      <td style={{ textAlign: "left" }}>
+                        {parseDateArray(value.Date)}
+                      </td>
+                      <td style={{ textAlign: "left" }}>
+                        {value["Client Name"]}
+                      </td>
+                      <td>
+                        <div>
+                          <span style={{ float: "left", marginLeft: 0 }}>
+                            $
+                          </span>
+                          <span>{parseAmount(value.Amount)}</span>
+                        </div>
+                      </td>
+                      <td>-</td>
+                      <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+                    {/* si le client a Wholesaler Commission attribué */}
+                    {value["Wholesaler Commission"] && (
+                      <tr style={styles}>
+                        <td>-</td>
+                        <td style={{ textAlign: "center" }}>
+                          Wholesaler Commission
+                        </td>
+                        <td>-</td>
+                        <td>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              $
+                            </span>
+                            <span>
+                              {parseAmount(value["Wholesaler Commission"])}
+                            </span>
+                          </div>
+                        </td>
+                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                      </tr>
+                    )}
+                    {/* si le client a TPI Commission attribué */}
+                    {value["TPI Commission"] && (
+                      <tr style={styles}>
+                        <td>-</td>
+                        <td style={{ textAlign: "center" }}>TPI Commission</td>
+                        <td>-</td>
+                        <td>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              $
+                            </span>
+                            <span>{parseAmount(value["TPI Commission"])}</span>
+                          </div>
+                        </td>
+                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                      </tr>
+                    )}
+                  </>
+                );
+              })}
+
+              {values.length > 0 && (
+                <tr style={styles}>
+                  <td>-</td>
+                  <td style={{ textAlign: "left" }}>
+                    <strong>{values[0]["Parent Category"]}</strong>
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td style={{ borderRight: "solid 10px blue" }}></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              )}
               {values.map((value, index) => {
                 return (
                   <>
@@ -856,7 +1193,7 @@ function Home() {
                       ) != 0 && (
                         <tr style={styles}>
                           <td>-</td>
-                          <td>
+                          <td style={{ textAlign: "left" }}>
                             <strong>{value["Parent Category"]}</strong>
                           </td>
                           <td> </td>
@@ -870,22 +1207,44 @@ function Home() {
 
                     {value.Currency == "EUR" && (
                       <tr key={index} style={styles}>
-                        <td>{value.Date}</td>
-                        <td>{value.Merchant}</td>
+                        <td style={{ textAlign: "left" }}>
+                          {parseDateArray(value.Date)}
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          {value.Merchant}
+                        </td>
                         <td>-</td>
                         <td>-</td>
                         <td style={{ borderRight: "solid 10px blue" }}>-</td>
                         <td>-</td>
-                        <td>{value.Amount} EUR</td>
+                        <td>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              €
+                            </span>
+                            <span>{parseAmount(value.Amount)}</span>
+                          </div>
+                        </td>
                         <td>-</td>
                       </tr>
                     )}
                     {value.Currency == "USD" && (
                       <tr key={index} style={styles}>
-                        <td>{value.Date}</td>
-                        <td>{value.Merchant}</td>
+                        <td style={{ textAlign: "left" }}>
+                          {parseDateArray(value.Date)}
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          {value.Merchant}
+                        </td>
                         <td>-</td>
-                        <td>USD {value.Amount}</td>
+                        <td>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              $
+                            </span>
+                            <span>{parseAmount(value.Amount)}</span>
+                          </div>
+                        </td>
                         <td style={{ borderRight: "solid 10px blue" }}>-</td>
                         <td>-</td>
                         <td>-</td>
@@ -902,48 +1261,96 @@ function Home() {
                 </td>
                 {endingDollarRentalIncome && (
                   <td>
-                    <strong>USD {endingDollarRentalIncome}</strong>
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
+                        <span>{endingDollarRentalIncome}</span>
+                      </div>
+                    </strong>
                   </td>
                 )}
                 {!endingDollarRentalIncome && <td>-</td>}
                 {dollarExpensesEndingBalance && (
                   <td>
-                    <strong>USD {dollarExpensesEndingBalance}</strong>
+                    <strong>
+                      <div>
+                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
+                        <span>{dollarExpensesEndingBalance}</span>
+                      </div>
+                    </strong>
                   </td>
                 )}
                 {!dollarExpensesEndingBalance && <td>-</td>}
                 <td style={{ borderRight: "solid 10px blue" }}>
-                  <strong>USD {dollarEndingBalance}</strong>
+                  <strong>
+                    <div>
+                      <span style={{ float: "left", marginLeft: 0 }}>$</span>
+                      <span>{dollarEndingBalance}</span>
+                    </div>
+                  </strong>
                 </td>
 
-                {euroExpensesEndingBalance && checkedRadio == 1 && (
+                {euroExpensesEndingBalance && checkedRadioCurrency == 1 && (
                   <>
                     <td>
-                      <strong> {endingEuroRentalIncome} EUR</strong>
+                      <strong>
+                        <div>
+                          <span style={{ float: "left", marginLeft: 0 }}>
+                            €
+                          </span>
+                          <span>{endingEuroRentalIncome}</span>
+                        </div>
+                      </strong>
                     </td>
                     <td>
-                      <strong>{euroExpensesEndingBalance} EUR</strong>
+                      <strong>
+                        <div>
+                          <span style={{ float: "left", marginLeft: 0 }}>
+                            €
+                          </span>
+                          <span>{euroExpensesEndingBalance}</span>
+                        </div>
+                      </strong>
                     </td>
                   </>
                 )}
                 {!euroExpensesEndingBalance && <td>-</td>}
 
-                {euroExpensesEndingBalance && checkedRadio == 2 && (
+                {euroExpensesEndingBalance && checkedRadioCurrency == 2 && (
                   <>
                     <td>
                       {endingEuroRentalIncome && (
-                        <strong> {endingEuroRentalIncome} EUR</strong>
+                        <strong>
+                          <div>
+                            <span style={{ float: "left", marginLeft: 0 }}>
+                              €
+                            </span>
+                            <span>{endingEuroRentalIncome}</span>
+                          </div>
+                        </strong>
                       )}
                       {!endingEuroRentalIncome && <></>}
                     </td>
                     <td>
-                      <strong>{euroExpensesEndingBalance} EUR</strong>
+                      <strong>
+                        <div>
+                          <span style={{ float: "left", marginLeft: 0 }}>
+                            €
+                          </span>
+                          <span>{euroExpensesEndingBalance}</span>
+                        </div>
+                      </strong>
                     </td>
                   </>
                 )}
                 {!euroExpensesEndingBalance && <td>-</td>}
                 <td>
-                  <strong> {euroEndingBalance} EUR</strong>
+                  <strong>
+                    <div>
+                      <span style={{ float: "left", marginLeft: 0 }}>€</span>
+                      <span>{euroEndingBalance}</span>
+                    </div>
+                  </strong>
                 </td>
               </tr>
               <tr style={styles}>
@@ -954,7 +1361,7 @@ function Home() {
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
                 <td>Account Managed by</td>
-                <td>ROGERS Line</td>
+                <td>Line ROGERS</td>
               </tr>
               <tr style={styles}>
                 <td></td>
@@ -964,7 +1371,7 @@ function Home() {
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
                 <td>Report generated on</td>
-                <td>{today}</td>
+                <td>{parseDate(today)}</td>
               </tr>
             </tbody>
           </Table>
