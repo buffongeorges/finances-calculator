@@ -201,6 +201,10 @@ function Home() {
       rentalDollarIncomeResult += parseFloat(dollarBeginningBalance);
     }
     rentalDollarIncomeResult += parseFloat(fundsFromOwnerDollar);
+    // TODO : si fundsFromOwnerDollar < 0 est ce qu'il faut aussi le passer dans la case dépenses ???
+    // Si oui, il va falloir faire si > 0 => +rentalIncomeDollar et sinon, +dollarResult (qui represente les dépenses)
+    // et ne pas oublier de faire un affichage conditionnel (< ou >) des <td>
+    // et pareil pour fundsFromOwnerEuro....
     if (rentalIncomeArray) {
       rentalIncomeArray.forEach((val) => {
         rentalDollarIncomeResult += parseFloat(val.Amount);
