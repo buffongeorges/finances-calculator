@@ -472,11 +472,17 @@ function Home() {
   };
 
   const parseAmount = (amount) => {
-    if (amount) {
+    if (typeof amount === 'string') {
       const parsedValue = Number(amount.replace(",", "."));
-      return Number(parsedValue).toFixed(2);
+      const isNegative = parsedValue < 0;
+      const absValue = Math.abs(parsedValue);
+      const formattedValue = Number(absValue).toFixed(2);
+      return isNegative ? "-" + formattedValue : formattedValue;
     }
-    return Number(amount).toFixed(2);
+    if (typeof amount === 'number') {
+      return Number(amount).toFixed(2);
+    }
+    return "NaN";
   };
 
   return (
