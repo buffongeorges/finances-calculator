@@ -1,0 +1,18 @@
+changer USD en symbole 
+changer EUR en symbole
+Ecrire Line ROGERS au lieu de ROGERS Line
+Voir si possible de mettre Wholesaler Commission et TPI Commission sous les commissions en questions et sans mettre
+une nouvelle catégorie commission (Nice to have - chaud ?)
+Au clic sur un champ enlever le 0 
+faire la soustraction 0 - XXX et ne pas mettre XXX
+rajouter un radio button pour annual or monthly
+convertir toutes les dates au même format
+
+Beginning balance / Solde initial en gras : OUI
+
+lorsqu'un solde initial est négatif le faire passer dans l'autre colonne : 
+exemple : USD Beginning balance : -10000 => faire apparaitre dans Expenses en enlevant le moins(-) 10000
+
+
+########################################################## TEST #####################################
+$ 15579.38	
