@@ -476,14 +476,14 @@ function Home() {
   };
 
   const parseAmount = (amount) => {
-    if (typeof amount === 'string') {
+    if (typeof amount === "string") {
       const parsedValue = Number(amount.replace(",", "."));
       const isNegative = parsedValue < 0;
       const absValue = Math.abs(parsedValue);
       const formattedValue = Number(absValue).toFixed(2);
       return isNegative ? "-" + formattedValue : formattedValue;
     }
-    if (typeof amount === 'number') {
+    if (typeof amount === "number") {
       return Number(amount).toFixed(2);
     }
     return "NaN";
@@ -538,7 +538,7 @@ function Home() {
             id="clientName"
             aria-describedby="clientName"
             onChange={(e) => {
-              setClientName(e.target.value);
+              setClientName(e.target.value.toUpperCase());
               setShowTable(false);
             }}
           />
@@ -872,7 +872,7 @@ function Home() {
           >
             <thead>
               <tr style={styles}>
-                <th>Home owner statement</th>
+                <th>HOME OWNER STATEMENT</th>
               </tr>
               {clientName && (
                 <tr style={styles}>
@@ -881,21 +881,21 @@ function Home() {
               )}
               {!clientName && (
                 <tr style={styles}>
-                  <th>{"No name for client"}</th>
+                  <th>{"NO NAME FOR CLIENT"}</th>
                 </tr>
               )}
 
               <tr style={styles}>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Income USD / Recettes USD</th>
-                <th>Expense USD / Depenses USD</th>
+                <th>DATE</th>
+                <th>DESCRIPTION</th>
+                <th>INCOME USD / RECETTES USD</th>
+                <th>EXPENSE USD / DEPENSES USD</th>
                 <th style={{ borderRight: "10px solid blue" }}>
-                  Balance USD / Solde USD
+                  BALANCE USD / SOLDE USD
                 </th>
-                <th>Income EURO / Recettes EURO</th>
-                <th>Expense EURO / Depenses EURO</th>
-                <th>Balance EURO / Solde EURO</th>
+                <th>INCOME EURO / RECETTES EURO</th>
+                <th>EXPENSE EURO / DEPENSES EURO</th>
+                <th>BALANCE EURO / SOLDE EURO</th>
               </tr>
             </thead>
             <tbody>
@@ -903,7 +903,7 @@ function Home() {
               <tr style={styles}>
                 <td></td>
                 <td style={{ textAlign: "left" }}>
-                  <strong>Beginning balance / Solde initial</strong>
+                  <strong>BEGINNING BALANCE / SOLDE INITIAL</strong>
                 </td>
                 <td>
                   {dollarBeginningBalance >= 0 && (
@@ -978,7 +978,7 @@ function Home() {
                 <td></td>
                 <td style={{ textAlign: "left" }}>
                   {" "}
-                  <strong>Funds / Wire from owner </strong>
+                  <strong>FUNDS / WIRE FROM OWNER </strong>
                 </td>
                 <td>
                   <strong>
@@ -1006,7 +1006,7 @@ function Home() {
                 <tr style={styles}>
                   <td> </td>
                   <td style={{ textAlign: "left" }}>
-                    <strong>Currency Exchange / Cession de devises</strong>
+                    <strong>CURRENCY EXCHANGE / CESSION DE DEVISES</strong>
                   </td>
                   {dollarCession && checkedRadioCurrency == 1 && (
                     <>
@@ -1095,9 +1095,9 @@ function Home() {
                 <td style={{ textAlign: "left" }}>
                   {" "}
                   <strong>
-                    Rental Income
-                    {checkedRadioReportPeriod == 1 && <> (Month)</>}
-                    {checkedRadioReportPeriod == 2 && <> (Year)</>}
+                    RENTAL INCOME
+                    {checkedRadioReportPeriod == 1 && <> (MONTH)</>}
+                    {checkedRadioReportPeriod == 2 && <> (YEAR)</>}
                   </strong>
                 </td>
                 <td></td>
@@ -1116,7 +1116,7 @@ function Home() {
                         {parseDateArray(value.Date)}
                       </td>
                       <td style={{ textAlign: "left" }}>
-                        {value["Client Name"]}
+                        <strong>{value["Client Name"]}</strong>
                       </td>
                       <td>
                         <div>
@@ -1135,9 +1135,9 @@ function Home() {
                     {/* si le client a Wholesaler Commission attribué */}
                     {value["Wholesaler Commission"] && (
                       <tr style={styles}>
-                        <td>-</td>
+                        <td> </td>
                         <td style={{ textAlign: "center" }}>
-                          Wholesaler Commission
+                          <strong>WHOLESALER COMMISSION</strong>
                         </td>
                         <td>-</td>
                         <td>
@@ -1159,8 +1159,9 @@ function Home() {
                     {/* si le client a TPI Commission attribué */}
                     {value["TPI Commission"] && (
                       <tr style={styles}>
-                        <td>-</td>
-                        <td style={{ textAlign: "center" }}>TPI Commission</td>
+                        <td> </td>
+                        <td style={{ textAlign: "center" }}>
+                          <strong>TPI COMMISSION</strong></td>
                         <td>-</td>
                         <td>
                           <div>
@@ -1182,9 +1183,9 @@ function Home() {
 
               {values.length > 0 && (
                 <tr style={styles}>
-                  <td>-</td>
+                  <td> </td>
                   <td style={{ textAlign: "left" }}>
-                    <strong>{values[0]["Parent Category"]}</strong>
+                    <strong>{(values[0]["Parent Category"]).toUpperCase()}</strong>
                   </td>
                   <td></td>
                   <td></td>
@@ -1202,9 +1203,9 @@ function Home() {
                         values[index - 1]["Parent Category"]
                       ) != 0 && (
                         <tr style={styles}>
-                          <td>-</td>
+                          <td> </td>
                           <td style={{ textAlign: "left" }}>
-                            <strong>{value["Parent Category"]}</strong>
+                            <strong>{(value["Parent Category"]).toUpperCase()}</strong>
                           </td>
                           <td> </td>
                           <td> </td>
@@ -1267,7 +1268,11 @@ function Home() {
               <tr style={styles}>
                 <td></td>
                 <td>
-                  <strong>Ending balance / Solde de cloture</strong>
+                  <strong>
+                    <span style={{ float: "left", marginLeft: 0, textAlign: 'left' }}>
+                      ENDING BALANCE / SOLDE DE CLOTURE
+                    </span>
+                  </strong>
                 </td>
                 {endingDollarRentalIncome && (
                   <td>
@@ -1370,8 +1375,8 @@ function Home() {
                 <td></td>
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
-                <td>Account Managed by</td>
-                <td>Line ROGERS</td>
+                <td>ACCOUNT MANAGED BY</td>
+                <td>LINE ROGERS</td>
               </tr>
               <tr style={styles}>
                 <td></td>
@@ -1380,7 +1385,7 @@ function Home() {
                 <td></td>
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
-                <td>Report generated on</td>
+                <td>REPORT GENERATED ON</td>
                 <td>{parseDate(today)}</td>
               </tr>
             </tbody>
