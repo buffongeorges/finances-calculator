@@ -28,16 +28,14 @@ function Home() {
   const [fundsFromOwnerDollar, setFundsFromOwnerDollar] = useState(0);
 
   //ending balances
-  const [euroEndingBalance, setEuroEndingBalance] = useState(null);
-  const [dollarEndingBalance, setDollarEndingBalance] = useState(null);
+  const [euroEndingBalance, setEuroEndingBalance] = useState(0);
+  const [dollarEndingBalance, setDollarEndingBalance] = useState(0);
   const [euroExpensesEndingBalance, setEuroExpensesEndingBalance] = useState(0);
 
   const [dollarExpensesEndingBalance, setDollarExpensesEndingBalance] =
-    useState(null);
-  useState(null);
-  const [endingDollarRentalIncome, setDollarEndingRentalIncome] =
-    useState(null);
-  const [endingEuroRentalIncome, setEuroEndingRentalIncome] = useState(null);
+    useState(0);
+  const [endingDollarRentalIncome, setDollarEndingRentalIncome] = useState(0);
+  const [endingEuroRentalIncome, setEuroEndingRentalIncome] = useState(0);
 
   const [showTable, setShowTable] = useState(false);
   const [euroArray, setEuroArray] = useState();
@@ -476,18 +474,23 @@ function Home() {
   };
 
   const parseAmount = (amount) => {
-    if (amount == 0 || amount == '0.00') {
-      return '-';
+    if (amount == 0 || amount == '0.00' || amount == '0,00') {
+      return '0,00';
     }
     if (typeof amount === "string") {
       const parsedValue = Number(amount.replace(",", "."));
       const isNegative = parsedValue < 0;
       const absValue = Math.abs(parsedValue);
-      const formattedValue = Number(absValue).toFixed(2);
-      return isNegative ? "-" + formattedValue : formattedValue;
+      const decimalSeparator = ',';
+      const formattedValue = Number(absValue).toLocaleString('fr-FR', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formattedValueWithoutSpaces = formattedValue.replace(/\s/g, '');
+      return isNegative ? "-" + formattedValueWithoutSpaces : formattedValueWithoutSpaces;
     }
     if (typeof amount === "number") {
-      return Number(amount).toFixed(2);
+      const decimalSeparator = ',';
+      const formattedValue = Number(amount).toLocaleString('fr-FR', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formattedValueWithoutSpaces = formattedValue.replace(/\s/g, '');
+      return formattedValueWithoutSpaces;
     }
     return "NaN";
   };
@@ -912,7 +915,6 @@ function Home() {
                   {dollarBeginningBalance >= 0 && (
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
                         <span>{parseAmount(dollarBeginningBalance)}</span>
                       </div>
                     </strong>
@@ -920,8 +922,7 @@ function Home() {
                   {dollarBeginningBalance < 0 && (
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
-                        <span>0.00</span>
+                        <span>0,00</span>
                       </div>
                     </strong>
                   )}
@@ -930,32 +931,29 @@ function Home() {
                   {dollarBeginningBalance < 0 && (
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
                         <span>
                           {parseAmount(Math.abs(dollarBeginningBalance))}
                         </span>
                       </div>
                     </strong>
                   )}
-                  {dollarBeginningBalance >= 0 && <>-</>}
+                  {dollarBeginningBalance >= 0 && <>0,00</>}
                 </td>
                 <td style={{ borderRight: "solid 10px blue" }}>
-                  -{/* <strong>$ {dollarBeginningBalance} </strong> */}
+                  0,00
                 </td>
                 <td>
                   {euroBeginningBalance >= 0 && (
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>€</span>
-                        <span>{parseAmount(euroBeginningBalance)}</span>
+                          <span>{parseAmount(euroBeginningBalance)}</span>
                       </div>
                     </strong>
                   )}
                   {euroBeginningBalance < 0 && (
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>€</span>
-                        <span>0.00</span>
+                          <span>0,00</span>
                       </div>
                     </strong>
                   )}
@@ -964,16 +962,15 @@ function Home() {
                   {euroBeginningBalance < 0 && (
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>€</span>
-                        <span>
+                          <span>
                           {parseAmount(Math.abs(euroBeginningBalance))}
                         </span>
                       </div>
                     </strong>
                   )}
-                  {euroBeginningBalance >= 0 && <>-</>}
+                  {euroBeginningBalance >= 0 && <>0,00</>}
                 </td>
-                <td>-</td>
+                <td>0,00</td>
               </tr>
 
               {/* Funds from owner */}
@@ -986,23 +983,21 @@ function Home() {
                 <td>
                   <strong>
                     <div>
-                      <span style={{ float: "left", marginLeft: 0 }}>$</span>
                       <span>{parseAmount(fundsFromOwnerDollar)}</span>
                     </div>
                   </strong>{" "}
                 </td>
-                <td>-</td>
-                <td style={{ borderRight: "solid 10px blue" }}>-</td>
+                <td>0,00</td>
+                <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
                 <td>
                   <strong>
                     <div>
-                      <span style={{ float: "left", marginLeft: 0 }}>€</span>
                       <span>{parseAmount(fundsFromOwnerEuro)}</span>
                     </div>
                   </strong>
                 </td>
-                <td>-</td>
-                <td>-</td>
+                <td>0,00</td>
+                <td>0,00</td>
               </tr>
               {/* Cession de devises */}
               {(dollarCession || euroCession) && (
@@ -1017,9 +1012,6 @@ function Home() {
                       <td>
                         <strong>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              $
-                            </span>
                             <span>{parseAmount(dollarCession)}</span>
                           </div>
                         </strong>
@@ -1032,9 +1024,6 @@ function Home() {
                       <td>
                         <strong>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              $
-                            </span>
                             <span>{parseAmount(dollarCession)}</span>
                           </div>
                         </strong>
@@ -1056,9 +1045,6 @@ function Home() {
                       <td>
                         <strong>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              €
-                            </span>
                             <span>{parseAmount(euroCession)}</span>
                           </div>
                         </strong>
@@ -1073,9 +1059,6 @@ function Home() {
                       <td>
                         <strong>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              €
-                            </span>
                             <span>{parseAmount(euroCession)}</span>
                           </div>
                         </strong>
@@ -1123,17 +1106,14 @@ function Home() {
                       </td>
                       <td>
                         <div>
-                          <span style={{ float: "left", marginLeft: 0 }}>
-                            $
-                          </span>
                           <span>{parseAmount(value.Amount)}</span>
                         </div>
                       </td>
-                      <td>-</td>
-                      <td style={{ borderRight: "solid 10px blue" }}>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
+                      <td>0,00</td>
+                      <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                      <td>0,00</td>
+                      <td>0,00</td>
+                      <td>0,00</td>
                     </tr>
                     {/* si le client a Wholesaler Commission attribué */}
                     {value["Wholesaler Commission"] && (
@@ -1142,21 +1122,18 @@ function Home() {
                         <td style={{ textAlign: "center" }}>
                           <strong>WHOLESALER COMMISSION</strong>
                         </td>
-                        <td>-</td>
+                        <td>0,00</td>
                         <td>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              $
-                            </span>
                             <span>
                               {parseAmount(value["Wholesaler Commission"])}
                             </span>
                           </div>
                         </td>
-                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                        <td>0,00</td>
+                        <td>0,00</td>
+                        <td>0,00</td>
                       </tr>
                     )}
                     {/* si le client a TPI Commission attribué */}
@@ -1164,20 +1141,18 @@ function Home() {
                       <tr style={styles}>
                         <td> </td>
                         <td style={{ textAlign: "center" }}>
-                          <strong>TPI COMMISSION</strong></td>
-                        <td>-</td>
+                          <strong>TPI COMMISSION</strong>
+                        </td>
+                        <td>0,00</td>
                         <td>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              $
-                            </span>
                             <span>{parseAmount(value["TPI Commission"])}</span>
                           </div>
                         </td>
-                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                        <td>0,00</td>
+                        <td>0,00</td>
+                        <td>0,00</td>
                       </tr>
                     )}
                   </>
@@ -1188,7 +1163,9 @@ function Home() {
                 <tr style={styles}>
                   <td> </td>
                   <td style={{ textAlign: "left" }}>
-                    <strong>{(values[0]["Parent Category"]).toUpperCase()}</strong>
+                    <strong>
+                      {values[0]["Parent Category"].toUpperCase()}
+                    </strong>
                   </td>
                   <td></td>
                   <td></td>
@@ -1208,7 +1185,9 @@ function Home() {
                         <tr style={styles}>
                           <td> </td>
                           <td style={{ textAlign: "left" }}>
-                            <strong>{(value["Parent Category"]).toUpperCase()}</strong>
+                            <strong>
+                              {value["Parent Category"].toUpperCase()}
+                            </strong>
                           </td>
                           <td> </td>
                           <td> </td>
@@ -1227,19 +1206,16 @@ function Home() {
                         <td style={{ textAlign: "center" }}>
                           {value.Merchant}
                         </td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
-                        <td>-</td>
+                        <td>0,00</td>
+                        <td>0,00</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                        <td>0,00</td>
                         <td>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              €
-                            </span>
                             <span>{parseAmount(value.Amount)}</span>
                           </div>
                         </td>
-                        <td>-</td>
+                        <td>0,00</td>
                       </tr>
                     )}
                     {value.Currency == "USD" && (
@@ -1250,19 +1226,16 @@ function Home() {
                         <td style={{ textAlign: "center" }}>
                           {value.Merchant}
                         </td>
-                        <td>-</td>
+                        <td>0,00</td>
                         <td>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              $
-                            </span>
                             <span>{parseAmount(value.Amount)}</span>
                           </div>
                         </td>
-                        <td style={{ borderRight: "solid 10px blue" }}>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                        <td>0,00</td>
+                        <td>0,00</td>
+                        <td>0,00</td>
                       </tr>
                     )}
                   </>
@@ -1272,7 +1245,13 @@ function Home() {
                 <td></td>
                 <td>
                   <strong>
-                    <span style={{ float: "left", marginLeft: 0, textAlign: 'left' }}>
+                    <span
+                      style={{
+                        float: "left",
+                        marginLeft: 0,
+                        textAlign: "left",
+                      }}
+                    >
                       ENDING BALANCE / SOLDE DE CLOTURE
                     </span>
                   </strong>
@@ -1281,28 +1260,25 @@ function Home() {
                   <td>
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
                         <span>{parseAmount(endingDollarRentalIncome)}</span>
                       </div>
                     </strong>
                   </td>
                 )}
-                {!endingDollarRentalIncome && <td>-</td>}
+                {!endingDollarRentalIncome && <td>0,00</td>}
                 {dollarExpensesEndingBalance && (
                   <td>
                     <strong>
                       <div>
-                        <span style={{ float: "left", marginLeft: 0 }}>$</span>
                         <span>{parseAmount(dollarExpensesEndingBalance)}</span>
                       </div>
                     </strong>
                   </td>
                 )}
-                {!dollarExpensesEndingBalance && <td>-</td>}
+                {!dollarExpensesEndingBalance && <td>0,00</td>}
                 <td style={{ borderRight: "solid 10px blue" }}>
                   <strong>
                     <div>
-                      <span style={{ float: "left", marginLeft: 0 }}>$</span>
                       <span>{parseAmount(dollarEndingBalance)}</span>
                     </div>
                   </strong>
@@ -1313,9 +1289,6 @@ function Home() {
                     <td>
                       <strong>
                         <div>
-                          <span style={{ float: "left", marginLeft: 0 }}>
-                            €
-                          </span>
                           <span>{parseAmount(endingEuroRentalIncome)}</span>
                         </div>
                       </strong>
@@ -1323,16 +1296,13 @@ function Home() {
                     <td>
                       <strong>
                         <div>
-                          <span style={{ float: "left", marginLeft: 0 }}>
-                            €
-                          </span>
                           <span>{parseAmount(euroExpensesEndingBalance)}</span>
                         </div>
                       </strong>
                     </td>
                   </>
                 )}
-                {!euroExpensesEndingBalance && <td>-</td>}
+                {!euroExpensesEndingBalance && <td>0,00</td>}
 
                 {euroExpensesEndingBalance && checkedRadioCurrency == 2 && (
                   <>
@@ -1340,9 +1310,6 @@ function Home() {
                       {endingEuroRentalIncome && (
                         <strong>
                           <div>
-                            <span style={{ float: "left", marginLeft: 0 }}>
-                              €
-                            </span>
                             <span>{parseAmount(endingEuroRentalIncome)}</span>
                           </div>
                         </strong>
@@ -1352,20 +1319,16 @@ function Home() {
                     <td>
                       <strong>
                         <div>
-                          <span style={{ float: "left", marginLeft: 0 }}>
-                            €
-                          </span>
                           <span>{parseAmount(euroExpensesEndingBalance)}</span>
                         </div>
                       </strong>
                     </td>
                   </>
                 )}
-                {!euroExpensesEndingBalance && <td>-</td>}
+                {!euroExpensesEndingBalance && <td>0,00</td>}
                 <td>
                   <strong>
                     <div>
-                      <span style={{ float: "left", marginLeft: 0 }}>€</span>
                       <span>{parseAmount(euroEndingBalance)}</span>
                     </div>
                   </strong>
