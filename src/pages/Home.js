@@ -476,6 +476,9 @@ function Home() {
   };
 
   const parseAmount = (amount) => {
+    if (amount == 0 || amount == '0.00') {
+      return '-';
+    }
     if (typeof amount === "string") {
       const parsedValue = Number(amount.replace(",", "."));
       const isNegative = parsedValue < 0;
@@ -1279,7 +1282,7 @@ function Home() {
                     <strong>
                       <div>
                         <span style={{ float: "left", marginLeft: 0 }}>$</span>
-                        <span>{endingDollarRentalIncome}</span>
+                        <span>{parseAmount(endingDollarRentalIncome)}</span>
                       </div>
                     </strong>
                   </td>
@@ -1290,7 +1293,7 @@ function Home() {
                     <strong>
                       <div>
                         <span style={{ float: "left", marginLeft: 0 }}>$</span>
-                        <span>{dollarExpensesEndingBalance}</span>
+                        <span>{parseAmount(dollarExpensesEndingBalance)}</span>
                       </div>
                     </strong>
                   </td>
@@ -1300,7 +1303,7 @@ function Home() {
                   <strong>
                     <div>
                       <span style={{ float: "left", marginLeft: 0 }}>$</span>
-                      <span>{dollarEndingBalance}</span>
+                      <span>{parseAmount(dollarEndingBalance)}</span>
                     </div>
                   </strong>
                 </td>
@@ -1313,7 +1316,7 @@ function Home() {
                           <span style={{ float: "left", marginLeft: 0 }}>
                             €
                           </span>
-                          <span>{endingEuroRentalIncome}</span>
+                          <span>{parseAmount(endingEuroRentalIncome)}</span>
                         </div>
                       </strong>
                     </td>
@@ -1323,7 +1326,7 @@ function Home() {
                           <span style={{ float: "left", marginLeft: 0 }}>
                             €
                           </span>
-                          <span>{euroExpensesEndingBalance}</span>
+                          <span>{parseAmount(euroExpensesEndingBalance)}</span>
                         </div>
                       </strong>
                     </td>
@@ -1340,7 +1343,7 @@ function Home() {
                             <span style={{ float: "left", marginLeft: 0 }}>
                               €
                             </span>
-                            <span>{endingEuroRentalIncome}</span>
+                            <span>{parseAmount(endingEuroRentalIncome)}</span>
                           </div>
                         </strong>
                       )}
@@ -1352,7 +1355,7 @@ function Home() {
                           <span style={{ float: "left", marginLeft: 0 }}>
                             €
                           </span>
-                          <span>{euroExpensesEndingBalance}</span>
+                          <span>{parseAmount(euroExpensesEndingBalance)}</span>
                         </div>
                       </strong>
                     </td>
@@ -1363,7 +1366,7 @@ function Home() {
                   <strong>
                     <div>
                       <span style={{ float: "left", marginLeft: 0 }}>€</span>
-                      <span>{euroEndingBalance}</span>
+                      <span>{parseAmount(euroEndingBalance)}</span>
                     </div>
                   </strong>
                 </td>
