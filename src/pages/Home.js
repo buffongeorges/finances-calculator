@@ -474,25 +474,42 @@ function Home() {
   };
 
   const parseAmount = (amount) => {
-    if (amount == 0 || amount == '0.00' || amount == '0,00') {
-      return '0,00';
+    if (amount == 0 || amount == "0.00" || amount == "0,00") {
+      return "0,00";
     }
     if (typeof amount === "string") {
       const parsedValue = Number(amount.replace(",", "."));
       const isNegative = parsedValue < 0;
       const absValue = Math.abs(parsedValue);
-      const decimalSeparator = ',';
-      const formattedValue = Number(absValue).toLocaleString('fr-FR', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const formattedValueWithoutSpaces = formattedValue.replace(/\s/g, '');
-      return isNegative ? "-" + formattedValueWithoutSpaces : formattedValueWithoutSpaces;
+      const formattedValue = Number(absValue).toLocaleString("fr-FR", {
+        useGrouping: false,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const formattedValueWithoutSpaces = formattedValue.replace(/\s/g, "");
+      return isNegative
+        ? "-" + formattedValueWithoutSpaces
+        : formattedValueWithoutSpaces;
     }
     if (typeof amount === "number") {
-      const decimalSeparator = ',';
-      const formattedValue = Number(amount).toLocaleString('fr-FR', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const formattedValueWithoutSpaces = formattedValue.replace(/\s/g, '');
+      const formattedValue = Number(amount).toLocaleString("fr-FR", {
+        useGrouping: false,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const formattedValueWithoutSpaces = formattedValue.replace(/\s/g, "");
       return formattedValueWithoutSpaces;
     }
     return "NaN";
+  };
+
+  const amountIsNegative = (amount) => {
+    // Convertit la chaîne de caractères en nombre décimal si nécessaire
+    if (typeof amount === "string") {
+      amount = parseFloat(amount.replace(",", "."));
+    }
+    // Vérifie si le nombre est négatif et retourne true ou false en conséquence
+    return amount < 0;
   };
 
   return (
@@ -939,21 +956,19 @@ function Home() {
                   )}
                   {dollarBeginningBalance >= 0 && <>0,00</>}
                 </td>
-                <td style={{ borderRight: "solid 10px blue" }}>
-                  0,00
-                </td>
+                <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
                 <td>
                   {euroBeginningBalance >= 0 && (
                     <strong>
                       <div>
-                          <span>{parseAmount(euroBeginningBalance)}</span>
+                        <span>{parseAmount(euroBeginningBalance)}</span>
                       </div>
                     </strong>
                   )}
                   {euroBeginningBalance < 0 && (
                     <strong>
                       <div>
-                          <span>0,00</span>
+                        <span>0,00</span>
                       </div>
                     </strong>
                   )}
@@ -962,7 +977,7 @@ function Home() {
                   {euroBeginningBalance < 0 && (
                     <strong>
                       <div>
-                          <span>
+                        <span>
                           {parseAmount(Math.abs(euroBeginningBalance))}
                         </span>
                       </div>
@@ -1260,7 +1275,11 @@ function Home() {
                   <td>
                     <strong>
                       <div>
-                        <span>{parseAmount(endingDollarRentalIncome)}</span>
+                        <span style={{
+                          color: amountIsNegative(endingDollarRentalIncome)
+                            ? "red"
+                            : "black",
+                        }}>{parseAmount(endingDollarRentalIncome)}</span>
                       </div>
                     </strong>
                   </td>
@@ -1270,7 +1289,11 @@ function Home() {
                   <td>
                     <strong>
                       <div>
-                        <span>{parseAmount(dollarExpensesEndingBalance)}</span>
+                        <span style={{
+                          color: amountIsNegative(dollarExpensesEndingBalance)
+                            ? "red"
+                            : "black",
+                        }}>{parseAmount(dollarExpensesEndingBalance)}</span>
                       </div>
                     </strong>
                   </td>
@@ -1279,7 +1302,11 @@ function Home() {
                 <td style={{ borderRight: "solid 10px blue" }}>
                   <strong>
                     <div>
-                      <span>{parseAmount(dollarEndingBalance)}</span>
+                      <span style={{
+                          color: amountIsNegative(dollarEndingBalance)
+                            ? "red"
+                            : "black",
+                        }}>{parseAmount(dollarEndingBalance)}</span>
                     </div>
                   </strong>
                 </td>
@@ -1289,14 +1316,22 @@ function Home() {
                     <td>
                       <strong>
                         <div>
-                          <span>{parseAmount(endingEuroRentalIncome)}</span>
+                          <span style={{
+                          color: amountIsNegative(endingEuroRentalIncome)
+                            ? "red"
+                            : "black",
+                        }}>{parseAmount(endingEuroRentalIncome)}</span>
                         </div>
                       </strong>
                     </td>
                     <td>
                       <strong>
                         <div>
-                          <span>{parseAmount(euroExpensesEndingBalance)}</span>
+                          <span style={{
+                          color: amountIsNegative(euroExpensesEndingBalance)
+                            ? "red"
+                            : "black",
+                        }}>{parseAmount(euroExpensesEndingBalance)}</span>
                         </div>
                       </strong>
                     </td>
@@ -1310,7 +1345,11 @@ function Home() {
                       {endingEuroRentalIncome && (
                         <strong>
                           <div>
-                            <span>{parseAmount(endingEuroRentalIncome)}</span>
+                            <span style={{
+                          color: amountIsNegative(endingEuroRentalIncome)
+                            ? "red"
+                            : "black",
+                        }}>{parseAmount(endingEuroRentalIncome)}</span>
                           </div>
                         </strong>
                       )}
@@ -1319,7 +1358,11 @@ function Home() {
                     <td>
                       <strong>
                         <div>
-                          <span>{parseAmount(euroExpensesEndingBalance)}</span>
+                          <span style={{
+                          color: amountIsNegative(euroExpensesEndingBalance)
+                            ? "red"
+                            : "black",
+                        }}>{parseAmount(euroExpensesEndingBalance)}</span>
                         </div>
                       </strong>
                     </td>
@@ -1329,7 +1372,15 @@ function Home() {
                 <td>
                   <strong>
                     <div>
-                      <span>{parseAmount(euroEndingBalance)}</span>
+                      <span
+                        style={{
+                          color: amountIsNegative(euroEndingBalance)
+                            ? "red"
+                            : "black",
+                        }}
+                      >
+                        {parseAmount(euroEndingBalance)}
+                      </span>
                     </div>
                   </strong>
                 </td>
@@ -1342,7 +1393,7 @@ function Home() {
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
                 <td>ACCOUNT MANAGED BY</td>
-                <td>LINE ROGERS</td>
+                <td>Line ROGERS</td>
               </tr>
               <tr style={styles}>
                 <td></td>
