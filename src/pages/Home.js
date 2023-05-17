@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Form, Button, Table } from "react-bootstrap";
+import { Form, Button, Table, Modal } from "react-bootstrap";
 import Papa from "papaparse";
 import ReactHTMLTableToExcel from "react-html-table-to-excel";
 import "./Home.css";
@@ -48,6 +48,22 @@ function Home() {
   const [euroCession, setEuroCession] = useState(null);
   const [dollarCession, setDollarCession] = useState(null);
 
+  // modals
+  const [showSheetWrongFormatModal, setShowSheetWrongFormatModal] =
+    useState(false);
+  const [wrongFormatModalContent, setWrongFormatModalContent] =
+    useState(null);
+
+  const [showReviewSheetsModal, setShowReviewSheetsModal] = useState(false);
+  const [reviewSheetsModalContent, setReviewSheetsModalContent] = useState(false);
+
+  const [usdIncomeFileName, setUsdIncomeFileName] = useState(null);
+  const [usdExpenseFileName, setUsdExpenseFileName] = useState(null);
+  const [eurExpenseFileName, setEurExpenseFileName] = useState(null);
+  const [usdIncomeFileIsValid, setUsdIncomeFileIsValid] = useState(true);
+  const [usdExpenseFileIsValid, setUsdExpenseFileIsValid] = useState(true);
+  const [eurExpenseFileIsValid, setEurExpenseFileIsValid] = useState(true);
+
   // A SAVOIR / RETENIR : How to handle ref and useeffect together =>
   // I wanted to delete the default button when the generate file button was clicked
   //which means that i needed to know when the default button "Download file" with id test-table-xls-button was injected in the DOM
@@ -74,6 +90,8 @@ function Home() {
   const [values, setValues] = useState([]);
 
   const dollarChangeHandler = (event) => {
+    const fileName = event.target.files[0].name;
+    setUsdExpenseFileName(fileName);
     setShowTable(false);
     // Passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
@@ -93,16 +111,31 @@ function Home() {
 
         let newArray = values.concat(results.data);
 
-        newArray.sort((a, b) => {
-          return a["Parent Category"].localeCompare(b["Parent Category"]);
-        });
+        try {
+          newArray.sort((a, b) => {
+            return a["Parent Category"].localeCompare(b["Parent Category"]);
+          });
 
-        setValues(newArray);
+          setValues(newArray);
+          setUsdExpenseFileIsValid(true);
+        } catch (e) {
+          console.log(
+            "The file " +
+              fileName +
+              "is not correctly formatted"
+          );
+          console.log(e);
+          setUsdExpenseFileIsValid(false);
+          setShowSheetWrongFormatModal(true);
+          setWrongFormatModalContent(`${fileName}`);
+        }
       },
     });
   };
 
   const euroChangeHandler = (event) => {
+    const fileName = event.target.files[0].name;
+    setEurExpenseFileName(fileName);
     setShowTable(false);
     // Passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
@@ -120,16 +153,31 @@ function Home() {
         setEuroArray(results.data);
         let newArray = values.concat(results.data);
 
-        newArray.sort((a, b) => {
-          return a["Parent Category"].localeCompare(b["Parent Category"]);
-        });
-
-        setValues(newArray);
+        try {
+          newArray.sort((a, b) => {
+            return a["Parent Category"].localeCompare(b["Parent Category"]);
+          });
+  
+          setValues(newArray);
+          setEurExpenseFileIsValid(true);
+        } catch (e) {
+          console.log(
+            "The file " +
+              fileName +
+              "is not correctly formatted"
+          );
+          console.log(e);
+          setEurExpenseFileIsValid(false);
+          setShowSheetWrongFormatModal(true);
+          setWrongFormatModalContent(`${fileName}`);
+        }
       },
     });
   };
 
   const rentalIncomeChangeHandler = (event) => {
+    const fileName = event.target.files[0].name;
+    setUsdIncomeFileName(fileName);
     setShowTable(false);
     // Passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
@@ -144,121 +192,150 @@ function Home() {
   };
 
   const generateCustomReport = () => {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, "0");
-    var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-    var yyyy = today.getFullYear();
+    if (
+      usdIncomeFileIsValid &&
+      usdExpenseFileIsValid &&
+      eurExpenseFileIsValid
+    ) {
+      var today = new Date();
+      var dd = String(today.getDate()).padStart(2, "0");
+      var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+      var yyyy = today.getFullYear();
 
-    today = mm + "/" + dd + "/" + yyyy;
-    setDate(today);
-    let dollarResult = parseFloat(0);
-    let euroResult = parseFloat(0);
-    let rentalDollarIncomeResult = parseFloat(0);
-    let rentalEuroIncomeResult = parseFloat(0);
+      today = mm + "/" + dd + "/" + yyyy;
+      setDate(today);
+      let dollarResult = parseFloat(0);
+      let euroResult = parseFloat(0);
+      let rentalDollarIncomeResult = parseFloat(0);
+      let rentalEuroIncomeResult = parseFloat(0);
 
-    if (dollarArray) {
-      dollarArray.forEach((val) => {
-        const parsedValue = Number(val.Amount.replace(",", "."));
-        dollarResult += parseFloat(parsedValue);
-      });
-    }
-
-    if (dollarCession && checkedRadioCurrency == 1) {
-      dollarResult += parseFloat(dollarCession);
-    }
-
-    if (dollarBeginningBalance < 0) {
-      //solde initial négatif => dépense
-      dollarResult += parseFloat(Math.abs(dollarBeginningBalance));
-    }
-
-    // add commissions (TPI & Wholesaler) if present
-    rentalIncomeArray.forEach((rentalIncome) => {
-      console.log(rentalIncome);
-      if (rentalIncome["TPI Commission"]) {
-        console.log("TPI Commission exists!");
-        const parsedTpiCommission = Number(
-          rentalIncome["TPI Commission"].replace(",", ".")
-        );
-        dollarResult += parseFloat(parsedTpiCommission);
+      if (dollarArray) {
+        dollarArray.forEach((val) => {
+          const parsedValue = Number(val.Amount.replace(",", "."));
+          dollarResult += parseFloat(parsedValue);
+        });
       }
-      if (rentalIncome["Wholesaler Commission"]) {
-        console.log("Wholesaler Commission exists!");
-        const parsedWholesalerCommission = Number(
-          rentalIncome["Wholesaler Commission"].replace(",", ".")
-        );
-        dollarResult += parseFloat(parsedWholesalerCommission);
+
+      if (dollarCession && checkedRadioCurrency == 1) {
+        dollarResult += parseFloat(dollarCession);
       }
-    });
-    setDollarExpensesEndingBalance(
-      (Math.round(dollarResult * 100) / 100).toFixed(2)
-    );
 
-    //dollar rental income
-    if (dollarBeginningBalance >= 0) {
-      rentalDollarIncomeResult += parseFloat(dollarBeginningBalance);
-    }
-    rentalDollarIncomeResult += parseFloat(fundsFromOwnerDollar);
-    // TODO : si fundsFromOwnerDollar < 0 est ce qu'il faut aussi le passer dans la case dépenses ???
-    // Si oui, il va falloir faire si > 0 => +rentalIncomeDollar et sinon, +dollarResult (qui represente les dépenses)
-    // et ne pas oublier de faire un affichage conditionnel (< ou >) des <td>
-    // et pareil pour fundsFromOwnerEuro....
-    if (rentalIncomeArray) {
-      rentalIncomeArray.forEach((val) => {
-        rentalDollarIncomeResult += parseFloat(val.Amount);
+      if (dollarBeginningBalance < 0) {
+        //solde initial négatif => dépense
+        dollarResult += parseFloat(Math.abs(dollarBeginningBalance));
+      }
+
+      // add commissions (TPI & Wholesaler) if present
+      rentalIncomeArray.forEach((rentalIncome) => {
+        console.log(rentalIncome);
+        if (rentalIncome["TPI Commission"]) {
+          console.log("TPI Commission exists!");
+          const parsedTpiCommission = Number(
+            rentalIncome["TPI Commission"].replace(",", ".")
+          );
+          dollarResult += parseFloat(parsedTpiCommission);
+        }
+        if (rentalIncome["Wholesaler Commission"]) {
+          console.log("Wholesaler Commission exists!");
+          const parsedWholesalerCommission = Number(
+            rentalIncome["Wholesaler Commission"].replace(",", ".")
+          );
+          dollarResult += parseFloat(parsedWholesalerCommission);
+        }
       });
-      if (dollarCession && checkedRadioCurrency == 2)
-        rentalDollarIncomeResult += parseFloat(dollarCession);
-    }
-    console.log(rentalDollarIncomeResult);
-    if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult >= 0) {
-      console.log("la valeur que je fixe est: ");
-      console.log(
-        (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
+      setDollarExpensesEndingBalance(
+        (Math.round(dollarResult * 100) / 100).toFixed(2)
       );
-      setDollarEndingRentalIncome(
-        (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
+
+      //dollar rental income
+      if (dollarBeginningBalance >= 0) {
+        rentalDollarIncomeResult += parseFloat(dollarBeginningBalance);
+      }
+      rentalDollarIncomeResult += parseFloat(fundsFromOwnerDollar);
+      // TODO : si fundsFromOwnerDollar < 0 est ce qu'il faut aussi le passer dans la case dépenses ???
+      // Si oui, il va falloir faire si > 0 => +rentalIncomeDollar et sinon, +dollarResult (qui represente les dépenses)
+      // et ne pas oublier de faire un affichage conditionnel (< ou >) des <td>
+      // et pareil pour fundsFromOwnerEuro....
+      if (rentalIncomeArray) {
+        rentalIncomeArray.forEach((val) => {
+          rentalDollarIncomeResult += parseFloat(val.Amount);
+        });
+        if (dollarCession && checkedRadioCurrency == 2)
+          rentalDollarIncomeResult += parseFloat(dollarCession);
+      }
+      console.log(rentalDollarIncomeResult);
+      if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult >= 0) {
+        console.log("la valeur que je fixe est: ");
+        console.log(
+          (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
+        );
+        setDollarEndingRentalIncome(
+          (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
+        );
+      }
+
+      //euro rental income
+      if (euroArray) {
+        console.log(euroArray);
+        euroArray.forEach((val) => {
+          euroResult += parseFloat(val.Amount);
+        });
+      }
+
+      if (euroBeginningBalance < 0) {
+        //solde initial négatif => dépense
+        euroResult += parseFloat(Math.abs(euroBeginningBalance));
+      }
+
+      if (euroBeginningBalance >= 0) {
+        rentalEuroIncomeResult += parseFloat(euroBeginningBalance);
+      }
+      rentalEuroIncomeResult += parseFloat(fundsFromOwnerEuro);
+      if (euroCession && checkedRadioCurrency == 2) {
+        euroResult += parseFloat(euroCession);
+        // no rental income for euros ...
+        // TO DO : ... except for funds/wire
+        // rentalEuroIncomeResult += parseFloat(euroCession);
+        // setEuroEndingRentalIncome(rentalEuroIncomeResult);
+      } else if (euroCession && checkedRadioCurrency == 1) {
+        rentalEuroIncomeResult += parseFloat(euroCession);
+      }
+      setEuroEndingRentalIncome(
+        (Math.round(rentalEuroIncomeResult * 100) / 100).toFixed(2)
       );
-    }
 
-    //euro rental income
-    if (euroArray) {
-      console.log(euroArray);
-      euroArray.forEach((val) => {
-        euroResult += parseFloat(val.Amount);
-      });
-    }
+      setEuroExpensesEndingBalance(
+        (Math.round(euroResult * 100) / 100).toFixed(2)
+      );
+      setShowTable(true);
 
-    if (euroBeginningBalance < 0) {
-      //solde initial négatif => dépense
-      euroResult += parseFloat(Math.abs(euroBeginningBalance));
+      console.log("wait while generating....");
+      console.log("values");
+      console.log(values);
+    } else {
+      let content = '';
+      // one of the file is not correctly formatted
+      console.log('le résultat de la fonction')
+      setShowReviewSheetsModal(true);
+      let invalidFiles = getNumberOfInvalidFiles()[1];
+      let nbInvalidFiles = getNumberOfInvalidFiles()[0];
+      console.log('invalidFiles')
+      console.log(invalidFiles)
+      console.log('nbInvalidFiles')
+      console.log(nbInvalidFiles)
+      if (nbInvalidFiles > 1) {
+        invalidFiles.forEach((invalidFile, index) => {
+          content += invalidFile[1];
+          if (index < nbInvalidFiles - 1) {
+            content += ' and ';
+          }
+        });
+      }
+      else {
+        content += `${invalidFiles[0][1]}`;
+      }
+      setReviewSheetsModalContent(content);
     }
-
-    if (euroBeginningBalance >= 0) {
-      rentalEuroIncomeResult += parseFloat(euroBeginningBalance);
-    }
-    rentalEuroIncomeResult += parseFloat(fundsFromOwnerEuro);
-    if (euroCession && checkedRadioCurrency == 2) {
-      euroResult += parseFloat(euroCession);
-      // no rental income for euros ...
-      // TO DO : ... except for funds/wire
-      // rentalEuroIncomeResult += parseFloat(euroCession);
-      // setEuroEndingRentalIncome(rentalEuroIncomeResult);
-    } else if (euroCession && checkedRadioCurrency == 1) {
-      rentalEuroIncomeResult += parseFloat(euroCession);
-    }
-    setEuroEndingRentalIncome(
-      (Math.round(rentalEuroIncomeResult * 100) / 100).toFixed(2)
-    );
-
-    setEuroExpensesEndingBalance(
-      (Math.round(euroResult * 100) / 100).toFixed(2)
-    );
-    setShowTable(true);
-
-    console.log("wait while generating....");
-    console.log("values");
-    console.log(values);
   };
 
   const downloadExcelSheet = () => {
@@ -458,6 +535,16 @@ function Home() {
     });
   };
 
+  const getNumberOfInvalidFiles = () => {
+    const invalidFilesArray = [
+      [usdIncomeFileIsValid, usdIncomeFileName],
+      [eurExpenseFileIsValid, eurExpenseFileName],
+      [usdExpenseFileIsValid, usdExpenseFileName],
+    ].filter((item) => !item[0]);
+    const invalidFilesCount = invalidFilesArray.length;
+    return [invalidFilesCount, invalidFilesArray];
+  };
+
   //this function will be used to convert dates from excel sheets
   //be careful with it, for now just for dates like yyyy-mm-dd
   const parseDateArray = (dateString) => {
@@ -539,7 +626,6 @@ function Home() {
             <strong>Calculator</strong>
           </div>
         </div>
-
         <Button
           variant="secondary"
           type="submit"
@@ -550,6 +636,64 @@ function Home() {
         >
           Restart
         </Button>
+
+        {
+          <>
+            <Modal
+              show={showSheetWrongFormatModal}
+              onHide={() => {
+                setShowSheetWrongFormatModal(false);
+              }}
+              centered
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>
+                  <b>Oh no ! Format error !</b>
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body>The file <strong>{wrongFormatModalContent}</strong> is not in the expected format ! Please double check it</Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setShowSheetWrongFormatModal(false);
+                  }}
+                >
+                  Close
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          </>
+        }
+        {
+          <>
+            <Modal
+              show={showReviewSheetsModal}
+              onHide={() => {
+                setShowReviewSheetsModal(false);
+              }}
+              centered
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>
+                  <b>Some files need your attention !</b>
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body>The file{getNumberOfInvalidFiles()[0] > 1 ? 's' : ''} <b>{reviewSheetsModalContent}</b> {getNumberOfInvalidFiles()[0] > 1 ? 'are ' : 'is '} invalid.
+              Please check {getNumberOfInvalidFiles()[0] > 1 ? 'them' : 'it'}</Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setShowReviewSheetsModal(false);
+                  }}
+                >
+                  Review
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          </>
+        }
 
         <Form.Group className="mb-3">
           <Form.Label htmlFor="clientName">
@@ -566,7 +710,6 @@ function Home() {
             }}
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             USD Beginning balance / Solde initial USD
@@ -598,7 +741,6 @@ function Home() {
             }}
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             EUR Beginning balance / Solde initial EUR
@@ -630,7 +772,6 @@ function Home() {
             }}
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             Funds / wire from owner USD (optional)
@@ -661,7 +802,6 @@ function Home() {
             }}
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             Funds / wire from owner EURO (optional)
@@ -692,7 +832,6 @@ function Home() {
             }}
           />
         </Form.Group>
-
         <Form.Group className="mb-5">
           <Form.Label>
             Select the <strong>Income USD (payments collected)</strong> file /
@@ -703,13 +842,8 @@ function Home() {
             </strong>
           </Form.Label>
 
-          <Form.Control
-            type="file"
-            placeholder="Enter email"
-            onChange={rentalIncomeChangeHandler}
-          />
+          <Form.Control type="file" onChange={rentalIncomeChangeHandler} />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             Currency Exchange / Cession devises USD (optional)
@@ -741,7 +875,6 @@ function Home() {
             }}
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             Currency exchange / Cession devises EURO (optional)
@@ -772,7 +905,6 @@ function Home() {
             }}
           />
         </Form.Group>
-
         <div
           key={`inline-radio`}
           className="mb-3"
@@ -801,7 +933,6 @@ function Home() {
             id={`inline-radio-2`}
           />
         </div>
-
         <Form.Group className="mb-5">
           <Form.Label>
             Select the <strong>Expense USD </strong> file / Choisissez le
@@ -817,7 +948,6 @@ function Home() {
             onChange={dollarChangeHandler}
           />
         </Form.Group>
-
         <Form.Group className="mb-5">
           <Form.Label>
             Select the <strong>Expense EURO </strong>file / Choisissez le
@@ -833,7 +963,6 @@ function Home() {
             onChange={euroChangeHandler}
           />
         </Form.Group>
-
         <div
           key={`inline-radio-report-period`}
           className="mb-2"
@@ -860,7 +989,6 @@ function Home() {
             id={`report-period-2`}
           />
         </div>
-
         <Button
           variant="primary"
           type="submit"
@@ -1112,7 +1240,7 @@ function Home() {
               {rentalIncomeArray.map((value, index) => {
                 return (
                   <>
-                    <tr key={index} style={styles}>
+                    <tr style={styles}>
                       <td style={{ textAlign: "left" }}>
                         {parseDateArray(value.Date)}
                       </td>
@@ -1197,7 +1325,7 @@ function Home() {
                       value["Parent Category"].localeCompare(
                         values[index - 1]["Parent Category"]
                       ) != 0 && (
-                        <tr style={styles}>
+                        <tr key={index} style={styles}>
                           <td> </td>
                           <td style={{ textAlign: "left" }}>
                             <strong>
@@ -1275,11 +1403,15 @@ function Home() {
                   <td>
                     <strong>
                       <div>
-                        <span style={{
-                          color: amountIsNegative(endingDollarRentalIncome)
-                            ? "red"
-                            : "black",
-                        }}>{parseAmount(endingDollarRentalIncome)}</span>
+                        <span
+                          style={{
+                            color: amountIsNegative(endingDollarRentalIncome)
+                              ? "red"
+                              : "black",
+                          }}
+                        >
+                          {parseAmount(endingDollarRentalIncome)}
+                        </span>
                       </div>
                     </strong>
                   </td>
@@ -1289,11 +1421,15 @@ function Home() {
                   <td>
                     <strong>
                       <div>
-                        <span style={{
-                          color: amountIsNegative(dollarExpensesEndingBalance)
-                            ? "red"
-                            : "black",
-                        }}>{parseAmount(dollarExpensesEndingBalance)}</span>
+                        <span
+                          style={{
+                            color: amountIsNegative(dollarExpensesEndingBalance)
+                              ? "red"
+                              : "black",
+                          }}
+                        >
+                          {parseAmount(dollarExpensesEndingBalance)}
+                        </span>
                       </div>
                     </strong>
                   </td>
@@ -1302,11 +1438,15 @@ function Home() {
                 <td style={{ borderRight: "solid 10px blue" }}>
                   <strong>
                     <div>
-                      <span style={{
+                      <span
+                        style={{
                           color: amountIsNegative(dollarEndingBalance)
                             ? "red"
                             : "black",
-                        }}>{parseAmount(dollarEndingBalance)}</span>
+                        }}
+                      >
+                        {parseAmount(dollarEndingBalance)}
+                      </span>
                     </div>
                   </strong>
                 </td>
@@ -1316,22 +1456,30 @@ function Home() {
                     <td>
                       <strong>
                         <div>
-                          <span style={{
-                          color: amountIsNegative(endingEuroRentalIncome)
-                            ? "red"
-                            : "black",
-                        }}>{parseAmount(endingEuroRentalIncome)}</span>
+                          <span
+                            style={{
+                              color: amountIsNegative(endingEuroRentalIncome)
+                                ? "red"
+                                : "black",
+                            }}
+                          >
+                            {parseAmount(endingEuroRentalIncome)}
+                          </span>
                         </div>
                       </strong>
                     </td>
                     <td>
                       <strong>
                         <div>
-                          <span style={{
-                          color: amountIsNegative(euroExpensesEndingBalance)
-                            ? "red"
-                            : "black",
-                        }}>{parseAmount(euroExpensesEndingBalance)}</span>
+                          <span
+                            style={{
+                              color: amountIsNegative(euroExpensesEndingBalance)
+                                ? "red"
+                                : "black",
+                            }}
+                          >
+                            {parseAmount(euroExpensesEndingBalance)}
+                          </span>
                         </div>
                       </strong>
                     </td>
@@ -1345,11 +1493,15 @@ function Home() {
                       {endingEuroRentalIncome && (
                         <strong>
                           <div>
-                            <span style={{
-                          color: amountIsNegative(endingEuroRentalIncome)
-                            ? "red"
-                            : "black",
-                        }}>{parseAmount(endingEuroRentalIncome)}</span>
+                            <span
+                              style={{
+                                color: amountIsNegative(endingEuroRentalIncome)
+                                  ? "red"
+                                  : "black",
+                              }}
+                            >
+                              {parseAmount(endingEuroRentalIncome)}
+                            </span>
                           </div>
                         </strong>
                       )}
@@ -1358,11 +1510,15 @@ function Home() {
                     <td>
                       <strong>
                         <div>
-                          <span style={{
-                          color: amountIsNegative(euroExpensesEndingBalance)
-                            ? "red"
-                            : "black",
-                        }}>{parseAmount(euroExpensesEndingBalance)}</span>
+                          <span
+                            style={{
+                              color: amountIsNegative(euroExpensesEndingBalance)
+                                ? "red"
+                                : "black",
+                            }}
+                          >
+                            {parseAmount(euroExpensesEndingBalance)}
+                          </span>
                         </div>
                       </strong>
                     </td>
