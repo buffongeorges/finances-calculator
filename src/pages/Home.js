@@ -644,10 +644,11 @@ function Home() {
               onHide={() => {
                 setShowSheetWrongFormatModal(false);
               }}
+
               centered
             >
               <Modal.Header closeButton>
-                <Modal.Title>
+                <Modal.Title style={{color: 'red'}}>
                   <b>Oh no ! Format error !</b>
                 </Modal.Title>
               </Modal.Header>
@@ -675,7 +676,7 @@ function Home() {
               centered
             >
               <Modal.Header closeButton>
-                <Modal.Title>
+                <Modal.Title style={{color: 'red'}}>
                   <b>Some files need your attention !</b>
                 </Modal.Title>
               </Modal.Header>
