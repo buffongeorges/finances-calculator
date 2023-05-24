@@ -1242,7 +1242,7 @@ function Home() {
                 return (
                   <>
                     <tr style={styles}>
-                      <td style={{ textAlign: "left" }}>
+                      <td style={{ textAlign: "center" }}>
                         {parseDateArray(value.Date)}
                       </td>
                       <td style={{ textAlign: "left" }}>
@@ -1344,7 +1344,7 @@ function Home() {
 
                     {value.Currency == "EUR" && (
                       <tr key={index} style={styles}>
-                        <td style={{ textAlign: "left" }}>
+                        <td style={{ textAlign: "center" }}>
                           {parseDateArray(value.Date)}
                         </td>
                         <td style={{ textAlign: "center" }}>
@@ -1364,7 +1364,7 @@ function Home() {
                     )}
                     {value.Currency == "USD" && (
                       <tr key={index} style={styles}>
-                        <td style={{ textAlign: "left" }}>
+                        <td style={{ textAlign: "center" }}>
                           {parseDateArray(value.Date)}
                         </td>
                         <td style={{ textAlign: "center" }}>
@@ -1549,8 +1549,8 @@ function Home() {
                 <td></td>
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
-                <td>ACCOUNT MANAGED BY</td>
-                <td>Line ROGERS</td>
+                <td></td>
+                <td>ACCOUNT MANAGED BY Line ROGERS</td>
               </tr>
               <tr style={styles}>
                 <td></td>
@@ -1559,8 +1559,8 @@ function Home() {
                 <td></td>
                 <td style={{ borderRight: "solid 10px blue" }}></td>
                 <td></td>
-                <td>REPORT GENERATED ON</td>
-                <td>{parseDate(today)}</td>
+                <td></td>
+                <td>REPORT GENERATED ON {parseDate(today)}</td>
               </tr>
             </tbody>
           </Table>
