@@ -230,6 +230,7 @@ function Home() {
         console.log(rentalIncome);
         if (rentalIncome["TPI Commission"]) {
           console.log("TPI Commission exists!");
+          console.log(rentalIncome["TPI Commission"]);
           const parsedTpiCommission = Number(
             rentalIncome["TPI Commission"].replace(",", ".")
           );
@@ -237,6 +238,7 @@ function Home() {
         }
         if (rentalIncome["Wholesaler Commission"]) {
           console.log("Wholesaler Commission exists!");
+          console.log(rentalIncome["Wholesaler Commission"]);
           const parsedWholesalerCommission = Number(
             rentalIncome["Wholesaler Commission"].replace(",", ".")
           );
@@ -258,7 +260,11 @@ function Home() {
       // et pareil pour fundsFromOwnerEuro....
       if (rentalIncomeArray) {
         rentalIncomeArray.forEach((val) => {
-          rentalDollarIncomeResult += parseFloat(val.Amount);
+          const parsedClientIncomeAmount = Number(
+            val.Amount.replace(",", ".")
+          );
+          console.log('parsedClientIncomeAmount', parsedClientIncomeAmount);
+          rentalDollarIncomeResult += parseFloat(parsedClientIncomeAmount);
         });
         if (dollarCession && checkedRadioCurrency == 2)
           rentalDollarIncomeResult += parseFloat(dollarCession);
@@ -560,6 +566,8 @@ function Home() {
     }
   };
 
+  // fonction qui sert à afficher correctement les valeurs dans le tableau 
+  // pour faciliter le travail du client sur Excel 176715.26 ==> 17615,26
   const parseAmount = (amount) => {
     if (amount == 0 || amount == "0.00" || amount == "0,00") {
       return "0,00";

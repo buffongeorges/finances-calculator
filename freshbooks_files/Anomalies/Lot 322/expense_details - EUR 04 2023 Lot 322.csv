@@ -1,0 +1,8 @@
+Date,Account Sub Type,Parent Category,Subcategory,Source,Merchant,Project,Client,Description,Tax 1 Amount,Tax 1 Type,Tax 2 Amount,Tax 2 Type,Amount,Currency
+4/30/2023,Operating Expense,Professional Services,Professional Services (general),Jessica Mingo,THE PROPERTY INK,,LA BELLA CASA,Property management monthly fee,18,TGCA,0,,468,EUR
+4/30/2023,Operating Expense,Contractors,Contractors (general),Jessica Mingo,A+POOL SERVICES,,LA BELLA CASA,Pool maintenance monthly fee,14.4,TGCA,0,,374.4,EUR
+4/30/2023,Operating Expense,Other Expenses,Wages,Jessica Mingo,JN BAPTISTE EMILIE,,LA BELLA CASA,Monthly salary,0,,0,,921.44,EUR
+4/30/2023,Operating Expense,Other Expenses,Wages,Jessica Mingo,DAMIER MARIE ANNE,,LA BELLA CASA,Monthly salary,0,,0,,921.44,EUR
+4/30/2023,Operating Expense,Utilities,Utilities (general),Jessica Mingo,SAUR WATER COMPANY,,LA BELLA CASA,Water bill,0,,0,,417.52,EUR
+4/30/2023,Operating Expense,Utilities,Utilities (general),Jessica Mingo,EDF,,LA BELLA CASA,Electricity monthly fee,0,,0,,1967.08,EUR
+4/30/2023,Operating Expense,Other Expenses,Taxes & Licenses,Jessica Mingo,CESU/URSSAF (SOCIAL SECURITY),,LA BELLA CASA,Social security charges February.,0,,0,,776.76,EUR
