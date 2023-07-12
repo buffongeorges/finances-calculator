@@ -39,8 +39,10 @@ function Home() {
 
   const [showTable, setShowTable] = useState(false);
   const [euroArray, setEuroArray] = useState();
-  const [rentalIncomeArray, setRentalIncomeArray] = useState([]);
   const [dollarArray, setDollarArray] = useState();
+
+  const [usdRentalIncomeArray, setUsdRentalIncomeArray] = useState([]);
+  const [eurRentalIncomeArray, setEurRentalIncomeArray] = useState([]);
 
   const [checkedRadioCurrency, setCheckedRadioCurrency] = useState(1);
   const [checkedRadioReportPeriod, setCheckedRadioReportPeriod] = useState(1);
@@ -58,6 +60,8 @@ function Home() {
   const [reviewSheetsModalContent, setReviewSheetsModalContent] = useState(false);
 
   const [usdIncomeFileName, setUsdIncomeFileName] = useState(null);
+  const [eurIncomeFileName, setEurIncomeFileName] = useState(null);
+
   const [usdExpenseFileName, setUsdExpenseFileName] = useState(null);
   const [eurExpenseFileName, setEurExpenseFileName] = useState(null);
   const [usdIncomeFileIsValid, setUsdIncomeFileIsValid] = useState(true);
@@ -175,7 +179,7 @@ function Home() {
     });
   };
 
-  const rentalIncomeChangeHandler = (event) => {
+  const usdRentalIncomeChangeHandler = (event) => {
     const fileName = event.target.files[0].name;
     setUsdIncomeFileName(fileName);
     setShowTable(false);
@@ -184,9 +188,25 @@ function Home() {
       header: true,
       skipEmptyLines: true,
       complete: function (results) {
-        console.log("rentalIncomeArray USD.............");
+        console.log("usdRentalIncomeArray USD.............");
         console.log(results.data);
-        setRentalIncomeArray(results.data);
+        setUsdRentalIncomeArray(results.data);
+      },
+    });
+  };
+
+  const eurRentalIncomeChangeHandler = (event) => {
+    const fileName = event.target.files[0].name;
+    setEurIncomeFileName(fileName);
+    setShowTable(false);
+    // Passing file data (event.target.files[0]) to parse using Papa.parse
+    Papa.parse(event.target.files[0], {
+      header: true,
+      skipEmptyLines: true,
+      complete: function (results) {
+        console.log("eurRentalIncomeArray EURO.............");
+        console.log(results.data);
+        setEurRentalIncomeArray(results.data);
       },
     });
   };
@@ -225,22 +245,22 @@ function Home() {
         dollarResult += parseFloat(Math.abs(dollarBeginningBalance));
       }
 
-      // add commissions (TPI & Wholesaler) if present
-      rentalIncomeArray.forEach((rentalIncome) => {
-        console.log(rentalIncome);
-        if (rentalIncome["TPI Commission"]) {
+      // add commissions (TPI & Wholesaler => expenses) if present (Origin : USD Income input)
+      usdRentalIncomeArray.forEach((usdRentalIncome) => {
+        console.log(usdRentalIncome);
+        if (usdRentalIncome["TPI Commission"]) {
           console.log("TPI Commission exists!");
-          console.log(rentalIncome["TPI Commission"]);
+          console.log(usdRentalIncome["TPI Commission"]);
           const parsedTpiCommission = Number(
-            rentalIncome["TPI Commission"].replace(",", ".")
+            usdRentalIncome["TPI Commission"].replace(",", ".")
           );
           dollarResult += parseFloat(parsedTpiCommission);
         }
-        if (rentalIncome["Wholesaler Commission"]) {
+        if (usdRentalIncome["Wholesaler Commission"]) {
           console.log("Wholesaler Commission exists!");
-          console.log(rentalIncome["Wholesaler Commission"]);
+          console.log(usdRentalIncome["Wholesaler Commission"]);
           const parsedWholesalerCommission = Number(
-            rentalIncome["Wholesaler Commission"].replace(",", ".")
+            usdRentalIncome["Wholesaler Commission"].replace(",", ".")
           );
           dollarResult += parseFloat(parsedWholesalerCommission);
         }
@@ -258,8 +278,8 @@ function Home() {
       // Si oui, il va falloir faire si > 0 => +rentalIncomeDollar et sinon, +dollarResult (qui represente les dépenses)
       // et ne pas oublier de faire un affichage conditionnel (< ou >) des <td>
       // et pareil pour fundsFromOwnerEuro....
-      if (rentalIncomeArray) {
-        rentalIncomeArray.forEach((val) => {
+      if (usdRentalIncomeArray) {
+        usdRentalIncomeArray.forEach((val) => {
           const parsedClientIncomeAmount = Number(
             val.Amount.replace(",", ".")
           );
@@ -270,7 +290,7 @@ function Home() {
           rentalDollarIncomeResult += parseFloat(dollarCession);
       }
       console.log(rentalDollarIncomeResult);
-      if (rentalIncomeArray.length > 0 || rentalDollarIncomeResult >= 0) {
+      if (usdRentalIncomeArray.length > 0 || rentalDollarIncomeResult >= 0) {
         console.log("la valeur que je fixe est: ");
         console.log(
           (Math.round(rentalDollarIncomeResult * 100) / 100).toFixed(2)
@@ -280,7 +300,7 @@ function Home() {
         );
       }
 
-      //euro rental income
+      //euro expenses from excel sheet
       if (euroArray) {
         console.log(euroArray);
         euroArray.forEach((val) => {
@@ -306,13 +326,52 @@ function Home() {
       } else if (euroCession && checkedRadioCurrency == 1) {
         rentalEuroIncomeResult += parseFloat(euroCession);
       }
+
+      if (eurRentalIncomeArray) {
+        eurRentalIncomeArray.forEach((val) => {
+          const parsedClientIncomeAmount = Number(
+            val.Amount.replace(",", ".")
+          );
+          console.log('parsedClientIncomeAmount', parsedClientIncomeAmount);
+          rentalEuroIncomeResult += parseFloat(parsedClientIncomeAmount);
+        });
+        if (dollarCession && checkedRadioCurrency == 2)
+          rentalEuroIncomeResult += parseFloat(dollarCession);
+      }
+
       setEuroEndingRentalIncome(
         (Math.round(rentalEuroIncomeResult * 100) / 100).toFixed(2)
       );
 
+      // end for EURO income
+
+      // add commissions (TPI & Wholesaler => expenses) if present (Origin : EUR Income input)
+      eurRentalIncomeArray.forEach((eurRentalIncome) => {
+        console.log(eurRentalIncome);
+        if (eurRentalIncome["TPI Commission"]) {
+          console.log("TPI Commission exists!");
+          console.log(eurRentalIncome["TPI Commission"]);
+          const parsedTpiCommission = Number(
+            eurRentalIncome["TPI Commission"].replace(",", ".")
+          );
+          euroResult += parseFloat(parsedTpiCommission);
+        }
+        if (eurRentalIncome["Wholesaler Commission"]) {
+          console.log("Wholesaler Commission exists!");
+          console.log(eurRentalIncome["Wholesaler Commission"]);
+          const parsedWholesalerCommission = Number(
+            eurRentalIncome["Wholesaler Commission"].replace(",", ".")
+          );
+          euroResult += parseFloat(parsedWholesalerCommission);
+        }
+      });
+
       setEuroExpensesEndingBalance(
         (Math.round(euroResult * 100) / 100).toFixed(2)
       );
+
+      // end for euro expenses
+
       setShowTable(true);
 
       console.log("wait while generating....");
@@ -841,6 +900,7 @@ function Home() {
             }}
           />
         </Form.Group>
+
         <Form.Group className="mb-5">
           <Form.Label>
             Select the <strong>Income USD (payments collected)</strong> file /
@@ -851,8 +911,22 @@ function Home() {
             </strong>
           </Form.Label>
 
-          <Form.Control type="file" onChange={rentalIncomeChangeHandler} />
+          <Form.Control type="file" onChange={usdRentalIncomeChangeHandler} />
         </Form.Group>
+
+        <Form.Group className="mb-5">
+          <Form.Label>
+            Select the <strong>Income EURO (payments collected)</strong> file /
+            Choisissez le fichier <strong>Recettes EURO </strong>
+            <br />
+            <strong style={{ color: "red" }}>
+              ATTENTION : only CSV format accepted
+            </strong>
+          </Form.Label>
+
+          <Form.Control type="file" onChange={eurRentalIncomeChangeHandler} />
+        </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label htmlFor="inputPassword5">
             Currency Exchange / Cession devises USD (optional)
@@ -1227,13 +1301,13 @@ function Home() {
                   )}
                 </tr>
               )}
-              {/* Rental Income */}
-              <tr style={styles}>
+              {/* Rental Income USD */}
+              {usdRentalIncomeArray.length > 0 && (<tr style={styles}>
                 <td></td>
                 <td style={{ textAlign: "left" }}>
                   {" "}
                   <strong>
-                    RENTAL INCOME
+                    RENTAL INCOME USD
                     {checkedRadioReportPeriod == 1 && <> (MONTH)</>}
                     {checkedRadioReportPeriod == 2 && <> (YEAR)</>}
                   </strong>
@@ -1244,9 +1318,9 @@ function Home() {
                 <td></td>
                 <td></td>
                 <td></td>
-              </tr>
+              </tr>)}
 
-              {rentalIncomeArray.map((value, index) => {
+              {usdRentalIncomeArray.map((value, index) => {
                 return (
                   <>
                     <tr style={styles}>
@@ -1311,6 +1385,91 @@ function Home() {
                 );
               })}
 
+              {/* Rental Income EURO */}
+              {eurRentalIncomeArray.length > 0 && (<tr style={styles}>
+                <td></td>
+                <td style={{ textAlign: "left" }}>
+                  {" "}
+                  <strong>
+                    RENTAL INCOME EURO
+                    {checkedRadioReportPeriod == 1 && <> (MONTH)</>}
+                    {checkedRadioReportPeriod == 2 && <> (YEAR)</>}
+                  </strong>
+                </td>
+                <td></td>
+                <td></td>
+                <td style={{ borderRight: "solid 10px blue" }}></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>)}
+
+              {eurRentalIncomeArray.map((value, index) => {
+                return (
+                  <>
+                    <tr style={styles}>
+                      <td style={{ textAlign: "center" }}>
+                        {parseDateArray(value.Date)}
+                      </td>
+                      <td style={{ textAlign: "left" }}>
+                        <strong>{value["Client Name"]}</strong>
+                      </td>
+                      <td>0,00</td>
+                      <td>0,00</td>
+                      <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                      <td>
+                        <div>
+                          <span>{parseAmount(value.Amount)}</span>
+                        </div>
+                      </td>
+                      <td>0,00</td>
+                      <td>0,00</td>
+                    </tr>
+                    {/* si le client a Wholesaler Commission attribué */}
+                    {value["Wholesaler Commission"] && (
+                      <tr style={styles}>
+                        <td> </td>
+                        <td style={{ textAlign: "center" }}>
+                          <strong>WHOLESALER COMMISSION</strong>
+                        </td>
+                        <td>0,00</td>
+                        <td>0,00</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                        <td>0,00</td>
+                        <td>
+                          <div>
+                            <span>
+                              {parseAmount(value["Wholesaler Commission"])}
+                            </span>
+                          </div>
+                        </td>
+                        <td>0,00</td>
+                      </tr>
+                    )}
+                    {/* si le client a TPI Commission attribué */}
+                    {value["TPI Commission"] && (
+                      <tr style={styles}>
+                        <td> </td>
+                        <td style={{ textAlign: "center" }}>
+                          <strong>TPI COMMISSION</strong>
+                        </td>
+                        <td>0,00</td>
+                        <td>0,00</td>
+                        <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
+                        <td>0,00</td>
+                        <td>
+                          <div>
+                            <span>{parseAmount(value["TPI Commission"])}</span>
+                          </div>
+                        </td>
+                        <td>0,00</td>
+                      </tr>
+                    )}
+                  </>
+                );
+              })}
+
+              {/* All the others expenses USD & EURO */}
               {values.length > 0 && (
                 <tr style={styles}>
                   <td> </td>
