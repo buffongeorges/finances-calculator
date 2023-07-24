@@ -53,11 +53,11 @@ function Home() {
   // modals
   const [showSheetWrongFormatModal, setShowSheetWrongFormatModal] =
     useState(false);
-  const [wrongFormatModalContent, setWrongFormatModalContent] =
-    useState(null);
+  const [wrongFormatModalContent, setWrongFormatModalContent] = useState(null);
 
   const [showReviewSheetsModal, setShowReviewSheetsModal] = useState(false);
-  const [reviewSheetsModalContent, setReviewSheetsModalContent] = useState(false);
+  const [reviewSheetsModalContent, setReviewSheetsModalContent] =
+    useState(false);
 
   const [usdIncomeFileName, setUsdIncomeFileName] = useState(null);
   const [eurIncomeFileName, setEurIncomeFileName] = useState(null);
@@ -123,11 +123,7 @@ function Home() {
           setValues(newArray);
           setUsdExpenseFileIsValid(true);
         } catch (e) {
-          console.log(
-            "The file " +
-              fileName +
-              "is not correctly formatted"
-          );
+          console.log("The file " + fileName + "is not correctly formatted");
           console.log(e);
           setUsdExpenseFileIsValid(false);
           setShowSheetWrongFormatModal(true);
@@ -161,15 +157,11 @@ function Home() {
           newArray.sort((a, b) => {
             return a["Parent Category"].localeCompare(b["Parent Category"]);
           });
-  
+
           setValues(newArray);
           setEurExpenseFileIsValid(true);
         } catch (e) {
-          console.log(
-            "The file " +
-              fileName +
-              "is not correctly formatted"
-          );
+          console.log("The file " + fileName + "is not correctly formatted");
           console.log(e);
           setEurExpenseFileIsValid(false);
           setShowSheetWrongFormatModal(true);
@@ -280,10 +272,8 @@ function Home() {
       // et pareil pour fundsFromOwnerEuro....
       if (usdRentalIncomeArray) {
         usdRentalIncomeArray.forEach((val) => {
-          const parsedClientIncomeAmount = Number(
-            val.Amount.replace(",", ".")
-          );
-          console.log('parsedClientIncomeAmount', parsedClientIncomeAmount);
+          const parsedClientIncomeAmount = Number(val.Amount.replace(",", "."));
+          console.log("parsedClientIncomeAmount", parsedClientIncomeAmount);
           rentalDollarIncomeResult += parseFloat(parsedClientIncomeAmount);
         });
         if (dollarCession && checkedRadioCurrency == 2)
@@ -329,10 +319,8 @@ function Home() {
 
       if (eurRentalIncomeArray) {
         eurRentalIncomeArray.forEach((val) => {
-          const parsedClientIncomeAmount = Number(
-            val.Amount.replace(",", ".")
-          );
-          console.log('parsedClientIncomeAmount', parsedClientIncomeAmount);
+          const parsedClientIncomeAmount = Number(val.Amount.replace(",", "."));
+          console.log("parsedClientIncomeAmount", parsedClientIncomeAmount);
           rentalEuroIncomeResult += parseFloat(parsedClientIncomeAmount);
         });
         if (dollarCession && checkedRadioCurrency == 2)
@@ -378,25 +366,24 @@ function Home() {
       console.log("values");
       console.log(values);
     } else {
-      let content = '';
+      let content = "";
       // one of the file is not correctly formatted
-      console.log('le résultat de la fonction')
+      console.log("le résultat de la fonction");
       setShowReviewSheetsModal(true);
       let invalidFiles = getNumberOfInvalidFiles()[1];
       let nbInvalidFiles = getNumberOfInvalidFiles()[0];
-      console.log('invalidFiles')
-      console.log(invalidFiles)
-      console.log('nbInvalidFiles')
-      console.log(nbInvalidFiles)
+      console.log("invalidFiles");
+      console.log(invalidFiles);
+      console.log("nbInvalidFiles");
+      console.log(nbInvalidFiles);
       if (nbInvalidFiles > 1) {
         invalidFiles.forEach((invalidFile, index) => {
           content += invalidFile[1];
           if (index < nbInvalidFiles - 1) {
-            content += ' and ';
+            content += " and ";
           }
         });
-      }
-      else {
+      } else {
         content += `${invalidFiles[0][1]}`;
       }
       setReviewSheetsModalContent(content);
@@ -613,19 +600,29 @@ function Home() {
   //this function will be used to convert dates from excel sheets
   //be careful with it, for now just for dates like yyyy-mm-dd
   const parseDateArray = (dateString) => {
+    console.log("dateString en entrée: ", dateString);
     if (/^\d{4}/.test(dateString)) {
       // Vérifie si la chaîne de caractères commence par une année (4 chiffres)
       const date = new Date(dateString);
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const day = date.getDate();
+      console.log("--------------------");
+      console.log("date", date);
+      console.log("year", year);
+      console.log("month", month);
+      console.log("day", day);
+      const result = `${month}/${day}/${year}`;
+      console.log("result", result);
+      console.log("--------------------");
       return `${month}/${day}/${year}`;
     } else {
+      console.log("dateString en entrée: ", dateString);
       return dateString;
     }
   };
 
-  // fonction qui sert à afficher correctement les valeurs dans le tableau 
+  // fonction qui sert à afficher correctement les valeurs dans le tableau
   // pour faciliter le travail du client sur Excel 176715.26 ==> 17615,26
   const parseAmount = (amount) => {
     if (amount == 0 || amount == "0.00" || amount == "0,00") {
@@ -711,15 +708,17 @@ function Home() {
               onHide={() => {
                 setShowSheetWrongFormatModal(false);
               }}
-
               centered
             >
               <Modal.Header closeButton>
-                <Modal.Title style={{color: 'red'}}>
+                <Modal.Title style={{ color: "red" }}>
                   <b>Oh no ! Format error !</b>
                 </Modal.Title>
               </Modal.Header>
-              <Modal.Body>The file <strong>{wrongFormatModalContent}</strong> is not in the expected format ! Please double check it</Modal.Body>
+              <Modal.Body>
+                The file <strong>{wrongFormatModalContent}</strong> is not in
+                the expected format ! Please double check it
+              </Modal.Body>
               <Modal.Footer>
                 <Button
                   variant="danger"
@@ -743,12 +742,16 @@ function Home() {
               centered
             >
               <Modal.Header closeButton>
-                <Modal.Title style={{color: 'red'}}>
+                <Modal.Title style={{ color: "red" }}>
                   <b>Some files need your attention !</b>
                 </Modal.Title>
               </Modal.Header>
-              <Modal.Body>The file{getNumberOfInvalidFiles()[0] > 1 ? 's' : ''} <b>{reviewSheetsModalContent}</b> {getNumberOfInvalidFiles()[0] > 1 ? 'are ' : 'is '} invalid.
-              Please check {getNumberOfInvalidFiles()[0] > 1 ? 'them' : 'it'}</Modal.Body>
+              <Modal.Body>
+                The file{getNumberOfInvalidFiles()[0] > 1 ? "s" : ""}{" "}
+                <b>{reviewSheetsModalContent}</b>{" "}
+                {getNumberOfInvalidFiles()[0] > 1 ? "are " : "is "} invalid.
+                Please check {getNumberOfInvalidFiles()[0] > 1 ? "them" : "it"}
+              </Modal.Body>
               <Modal.Footer>
                 <Button
                   variant="danger"
@@ -1302,23 +1305,25 @@ function Home() {
                 </tr>
               )}
               {/* Rental Income USD */}
-              {usdRentalIncomeArray.length > 0 && (<tr style={styles}>
-                <td></td>
-                <td style={{ textAlign: "left" }}>
-                  {" "}
-                  <strong>
-                    RENTAL INCOME USD
-                    {checkedRadioReportPeriod == 1 && <> (MONTH)</>}
-                    {checkedRadioReportPeriod == 2 && <> (YEAR)</>}
-                  </strong>
-                </td>
-                <td></td>
-                <td></td>
-                <td style={{ borderRight: "solid 10px blue" }}></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>)}
+              {usdRentalIncomeArray.length > 0 && (
+                <tr style={styles}>
+                  <td></td>
+                  <td style={{ textAlign: "left" }}>
+                    {" "}
+                    <strong>
+                      RENTAL INCOME USD
+                      {checkedRadioReportPeriod == 1 && <> (MONTH)</>}
+                      {checkedRadioReportPeriod == 2 && <> (YEAR)</>}
+                    </strong>
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td style={{ borderRight: "solid 10px blue" }}></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              )}
 
               {usdRentalIncomeArray.map((value, index) => {
                 return (
@@ -1386,23 +1391,25 @@ function Home() {
               })}
 
               {/* Rental Income EURO */}
-              {eurRentalIncomeArray.length > 0 && (<tr style={styles}>
-                <td></td>
-                <td style={{ textAlign: "left" }}>
-                  {" "}
-                  <strong>
-                    RENTAL INCOME EURO
-                    {checkedRadioReportPeriod == 1 && <> (MONTH)</>}
-                    {checkedRadioReportPeriod == 2 && <> (YEAR)</>}
-                  </strong>
-                </td>
-                <td></td>
-                <td></td>
-                <td style={{ borderRight: "solid 10px blue" }}></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>)}
+              {eurRentalIncomeArray.length > 0 && (
+                <tr style={styles}>
+                  <td></td>
+                  <td style={{ textAlign: "left" }}>
+                    {" "}
+                    <strong>
+                      RENTAL INCOME EURO
+                      {checkedRadioReportPeriod == 1 && <> (MONTH)</>}
+                      {checkedRadioReportPeriod == 2 && <> (YEAR)</>}
+                    </strong>
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td style={{ borderRight: "solid 10px blue" }}></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              )}
 
               {eurRentalIncomeArray.map((value, index) => {
                 return (
