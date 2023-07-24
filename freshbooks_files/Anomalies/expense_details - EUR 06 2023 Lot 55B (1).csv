@@ -1,0 +1,10 @@
+Date,Account Sub Type,Parent Category,Subcategory,Source,Merchant,Project,Client,Description,Tax 1 Amount,Tax 1 Type,Tax 2 Amount,Tax 2 Type,Amount,Currency
+2023-06-30,Operating Expense,Contractors,Contractors (general),Jessica Mingo,CHB CARAIBES,,AMBIANCE - CHAMPAGNE,Maintenance on the shutters,34.80,TGCA,0.00,,904.80,EUR
+2023-06-30,Operating Expense,Contractors,Contractors (general),Jessica Mingo,SAS ENJI,,AMBIANCE - CHAMPAGNE,Pool maintenance fee from January to May.,0.00,,0.00,,2355.00,EUR
+2023-06-30,Operating Expense,Contractors,Contractors (general),Jessica Mingo,SAS ENJI,,AMBIANCE - CHAMPAGNE,Pool maintenance monthly fee from August to December,0.00,,0.00,,1975.00,EUR
+2023-06-30,Operating Expense,Contractors,Contractors (general),Jessica Mingo,rapido clim,,AMBIANCE - CHAMPAGNE,Air conditionner maintenance and cleaning fees,0.00,,0.00,,518.00,EUR
+2023-06-30,Operating Expense,Professional Services,Professional Services (general),Jessica Mingo,THE PROPERTY INK,,AMBIANCE - CHAMPAGNE,Property management monthly fee,18.00,TGCA,0.00,,468.00,EUR
+2023-06-30,Operating Expense,Other Expenses,Wages,Jessica Mingo,COULANGES CHAVANNES,,AMBIANCE - CHAMPAGNE,Monthly salary,0.00,,0.00,,1383.11,EUR
+2023-06-30,Operating Expense,Other Expenses,Wages,Jessica Mingo,CHARLES THERESA,,AMBIANCE - CHAMPAGNE,Monthly salary,0.00,,0.00,,1383.11,EUR
+2023-06-30,Operating Expense,Other Expenses,HOUSING INSURANCE,Jessica Mingo,ALLIANZ,,AMBIANCE - CHAMPAGNE,Housing insurance,0.00,,0.00,,1768.98,EUR
+2023-06-30,Operating Expense,Utilities,Utilities (general),Jessica Mingo,SAUR WATER COMPANY,,AMBIANCE - CHAMPAGNE,1st quarter 2023 Water bill,0.00,,0.00,,8144.77,EUR

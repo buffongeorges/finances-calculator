@@ -601,21 +601,28 @@ function Home() {
   //be careful with it, for now just for dates like yyyy-mm-dd
   const parseDateArray = (dateString) => {
     console.log("dateString en entrée: ", dateString);
+    // Vérifie si la chaîne de caractères commence par une année (4 chiffres)
     if (/^\d{4}/.test(dateString)) {
-      // Vérifie si la chaîne de caractères commence par une année (4 chiffres)
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      console.log("--------------------");
-      console.log("date", date);
-      console.log("year", year);
-      console.log("month", month);
-      console.log("day", day);
-      const result = `${month}/${day}/${year}`;
-      console.log("result", result);
-      console.log("--------------------");
-      return `${month}/${day}/${year}`;
+      // const date = new Date(dateString);
+      // const year = date.getFullYear();
+      // const month = date.getMonth() + 1;
+      // const day = date.getDate();
+      // console.log("--------------------");
+      // console.log("date", date);
+      // console.log("year", year);
+      // console.log("month", month);
+      // console.log("day", day);
+      // const result = `${month}/${day}/${year}`;
+      // console.log("result", result);
+      // console.log("--------------------");
+      // return `${month}/${day}/${year}`;
+
+      // Alternative: 
+      const resultDate = new Date(dateString).toLocaleDateString("en-US", {
+        timeZone: "UTC",
+      });
+      console.log(resultDate, resultDate);
+      return resultDate;
     } else {
       console.log("dateString en sortie: ", dateString);
       return dateString;
@@ -1328,7 +1335,7 @@ function Home() {
               {usdRentalIncomeArray.map((value, index) => {
                 return (
                   <>
-                    <tr style={styles}>
+                    <tr style={styles} key={`usd-rental-array-${index}`}>
                       <td style={{ textAlign: "center" }}>
                         {parseDateArray(value.Date)}
                       </td>
@@ -1500,7 +1507,7 @@ function Home() {
                       value["Parent Category"].localeCompare(
                         values[index - 1]["Parent Category"]
                       ) != 0 && (
-                        <tr key={index} style={styles}>
+                        <tr key={`value-${index}`} style={styles}>
                           <td> </td>
                           <td style={{ textAlign: "left" }}>
                             <strong>
@@ -1517,7 +1524,7 @@ function Home() {
                       )}
 
                     {value.Currency == "EUR" && (
-                      <tr key={index} style={styles}>
+                      <tr key={`eur-${index}`} style={styles}>
                         <td style={{ textAlign: "center" }}>
                           {parseDateArray(value.Date)}
                         </td>
@@ -1537,7 +1544,7 @@ function Home() {
                       </tr>
                     )}
                     {value.Currency == "USD" && (
-                      <tr key={index} style={styles}>
+                      <tr key={`usd-${index}`} style={styles}>
                         <td style={{ textAlign: "center" }}>
                           {parseDateArray(value.Date)}
                         </td>
