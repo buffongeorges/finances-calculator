@@ -617,7 +617,7 @@ function Home() {
       console.log("--------------------");
       return `${month}/${day}/${year}`;
     } else {
-      console.log("dateString en entrée: ", dateString);
+      console.log("dateString en sortie: ", dateString);
       return dateString;
     }
   };
