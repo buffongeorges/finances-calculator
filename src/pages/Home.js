@@ -600,6 +600,7 @@ function Home() {
   //this function will be used to convert dates from excel sheets
   //be careful with it, for now just for dates like yyyy-mm-dd
   const parseDateArray = (dateString) => {
+    console.log("--------------------");
     console.log("dateString en entrée: ", dateString);
     // Vérifie si la chaîne de caractères commence par une année (4 chiffres)
     if (/^\d{4}/.test(dateString)) {
@@ -621,10 +622,12 @@ function Home() {
       const resultDate = new Date(dateString).toLocaleDateString("en-US", {
         timeZone: "UTC",
       });
-      console.log(resultDate, resultDate);
+      console.log('date en sortie', resultDate);
+      console.log("--------------------");
       return resultDate;
     } else {
       console.log("dateString en sortie: ", dateString);
+      console.log("--------------------");
       return dateString;
     }
   };
