@@ -6,3 +6,10 @@ td {
     color: blue;
     border-left-style: dashed;
 }
+
+.styled-div-with-bg-image {
+    background-image: url('../images/wallpaper.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+}
