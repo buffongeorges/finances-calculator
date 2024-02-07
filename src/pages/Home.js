@@ -931,7 +931,7 @@ function Home() {
 
           <Form.Group className="mb-3">
             <Form.Label htmlFor="fundsWireFromUsd">
-              Funds / wire from owner (optional)
+              Funds / wire(s) from owner (optional)
             </Form.Label>
             <Table
               id="wires-table"
@@ -1481,7 +1481,7 @@ function Home() {
                   <td></td>
                   <td style={{ textAlign: "left" }}>
                     {" "}
-                    <strong>FUNDS / WIRE FROM OWNER </strong>
+                    <strong>FUNDS / WIRE(S) FROM OWNER </strong>
                   </td>
                   <td></td>
                   <td></td>
