@@ -1007,7 +1007,7 @@ function Home() {
                           e.target.textContent
                         );
                         if (e.target.textContent == "")
-                          e.target.textContent = `Wire n° ${wireIndex}`;
+                          e.target.textContent = fundsFromOwnerEurUsdArray[wireIndex].wireName;
                       }}
                     >
                       {wireData.wireName}
@@ -1025,7 +1025,7 @@ function Home() {
                           e.target.textContent
                         );
                         if (e.target.textContent == "")
-                          e.target.textContent = 0;
+                          e.target.textContent = fundsFromOwnerEurUsdArray[wireIndex].wireDollar;
                       }}
                       onClick={(e) => {
                         if (e.target.textContent == 0)
@@ -1052,7 +1052,7 @@ function Home() {
                           e.target.textContent
                         );
                         if (e.target.textContent == "")
-                          e.target.textContent = 0;
+                          e.target.textContent = fundsFromOwnerEurUsdArray[wireIndex].wireEuro;
                       }}
                       onKeyPress={(event) => {
                         if (!/[0-9-.]/.test(event.key)) {
@@ -1091,66 +1091,6 @@ function Home() {
               </Button>
             </div>
           </Form.Group>
-          {/* <Form.Group className="mb-3">
-            <Form.Label htmlFor="fundsWireFromUsd">
-              Funds / wire from owner USD (optional)
-            </Form.Label>
-            <Form.Control
-              type="number"
-              min="0"
-              ref={fundsWireUsdRef}
-              defaultValue={0}
-              maxLength={10}
-              id="inputPassword5"
-              aria-describedby="passwordHelpBlock"
-              onChange={(e) => {
-                setFundsFromOwnerDollar(e.target.value);
-                setShowTable(false);
-              }}
-              onKeyPress={(event) => {
-                if (!/[0-9-.]/.test(event.key)) {
-                  event.preventDefault();
-                  alert("You can only enter numbers !");
-                }
-              }}
-              onWheel={(e) => {
-                e.target.blur();
-              }}
-              onClick={(e) => {
-                if (e.target.value == 0) fundsWireUsdRef.current.value = "";
-              }}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label htmlFor="fundsWireFromEur">
-              Funds / wire from owner EURO (optional)
-            </Form.Label>
-            <Form.Control
-              type="number"
-              min="0"
-              ref={fundsWireEurRef}
-              defaultValue={0}
-              maxLength={10}
-              id="inputPassword5"
-              aria-describedby="passwordHelpBlock"
-              onChange={(e) => {
-                setFundsFromOwnerEuro(e.target.value);
-                setShowTable(false);
-              }}
-              onKeyPress={(event) => {
-                if (!/[0-9-.]/.test(event.key)) {
-                  event.preventDefault();
-                  alert("You can only enter numbers !");
-                }
-              }}
-              onWheel={(e) => {
-                e.target.blur();
-              }}
-              onClick={(e) => {
-                if (e.target.value) fundsWireEurRef.current.value = "";
-              }}
-            />
-          </Form.Group> */}
 
           <Form.Group className="mb-5">
             <Form.Label>
@@ -1449,33 +1389,7 @@ function Home() {
                   </td>
                   <td>0,00</td>
                 </tr>
-                {/* 
-                <tr style={styles}>
-                  <td></td>
-                  <td style={{ textAlign: "left" }}>
-                    {" "}
-                    <strong>FUNDS / WIRE FROM OWNER </strong>
-                  </td>
-                  <td>
-                    <strong>
-                      <div>
-                        <span>{parseAmount(fundsFromOwnerDollar)}</span>
-                      </div>
-                    </strong>{" "}
-                  </td>
-                  <td>0,00</td>
-                  <td style={{ borderRight: "solid 10px blue" }}>0,00</td>
-                  <td>
-                    <strong>
-                      <div>
-                        <span>{parseAmount(fundsFromOwnerEuro)}</span>
-                      </div>
-                    </strong>
-                  </td>
-                  <td>0,00</td>
-                  <td>0,00</td>
-                </tr> */}
-
+                
                 {/* Funds from owner NEWWWWW*/}
                 <tr style={styles}>
                   <td></td>
