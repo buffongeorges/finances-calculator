@@ -285,7 +285,6 @@ function Home() {
         rentalDollarIncomeResult
       );
 
-
       // TODO : si fundsFromOwnerDollar < 0 est ce qu'il faut aussi le passer dans la case dépenses ???
       // Si oui, il va falloir faire si > 0 => +rentalIncomeDollar et sinon, +dollarResult (qui represente les dépenses)
       // et ne pas oublier de faire un affichage conditionnel (< ou >) des <td>
@@ -1450,8 +1449,7 @@ function Home() {
                   </td>
                   <td>0,00</td>
                 </tr>
-
-                {/* Funds from owner */}
+                {/* 
                 <tr style={styles}>
                   <td></td>
                   <td style={{ textAlign: "left" }}>
@@ -1476,14 +1474,14 @@ function Home() {
                   </td>
                   <td>0,00</td>
                   <td>0,00</td>
-                </tr>
+                </tr> */}
 
                 {/* Funds from owner NEWWWWW*/}
                 <tr style={styles}>
                   <td></td>
                   <td style={{ textAlign: "left" }}>
                     {" "}
-                    <strong>FUNDS / WIRE FROM OWNER V2 NEWWWW </strong>
+                    <strong>FUNDS / WIRE FROM OWNER </strong>
                   </td>
                   <td></td>
                   <td></td>
