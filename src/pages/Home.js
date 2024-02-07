@@ -940,7 +940,7 @@ function Home() {
               striped
               bordered
               hover
-              style={{ textAlign: "center !important" }}
+              style={{ textAlign: "center" }}
             >
               <thead>
                 <tr>
